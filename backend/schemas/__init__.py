@@ -1,4 +1,4 @@
-from schemas.user import UserCreate, UserUpdate, UserResponse, UserInDB
+from schemas.user_schemas import UserCreate, UserUpdate, UserResponse, UserInDB
 from schemas.auth import Token, TokenData, LoginRequest
 
 __all__ = [
