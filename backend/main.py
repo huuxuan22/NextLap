@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from config.config import settings
 from config.database import engine, Base
+from config.redis import RedisClient
 from models import User
 from utils.logger import logger
 from utils import Colors
@@ -31,6 +32,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.database_error(str(e))
     
+    # Connect to Redis
+    logger.info("🔌 Connecting to Redis...")
+    try:
+        await RedisClient.get_redis()
+        logger.info(f"✅ Redis connected at {settings.REDIS_HOST}:{settings.REDIS_PORT}")
+    except Exception as e:
+        logger.error(f"❌ Redis connection failed: {str(e)}")
+    
     # Show API documentation URLs
     print(f"\n{Colors.BRIGHT_CYAN}{'='*70}{Colors.RESET}")
     print(f"{Colors.BRIGHT_MAGENTA}📚 API Documentation:{Colors.RESET}")
@@ -41,6 +50,9 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown
+    # Close Redis connection
+    await RedisClient.close_connection()
+    
     print(f"\n{Colors.BRIGHT_RED}{'='*70}{Colors.RESET}")
     print(f"{Colors.BRIGHT_RED}🛑 NEXTLAP API SHUTTING DOWN{Colors.RESET}")
     print(f"{Colors.BRIGHT_RED}{'='*70}{Colors.RESET}\n")

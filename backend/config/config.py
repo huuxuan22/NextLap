@@ -16,6 +16,13 @@ class Settings(BaseSettings):
     # CORS settings
     CORS_ORIGINS: List[str] = ["*"]
     
+    # Redis settings
+    REDIS_HOST: str = Field("localhost", alias="REDIS_HOST")
+    REDIS_PORT: int = Field(6379, alias="REDIS_PORT")
+    REDIS_PASSWORD: str = Field("", alias="REDIS_PASSWORD")
+    REDIS_DB: int = Field(0, alias="REDIS_DB")
+    REDIS_DECODE_RESPONSES: bool = Field(True, alias="REDIS_DECODE_RESPONSES")
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
