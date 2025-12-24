@@ -8,6 +8,7 @@ import AuthLayout from '../layouts/AuthLayout';
 
 // Protected Route Component
 import PrivateRoute from './PrivateRoute';
+import Forbidden403 from '../pages/Forbidden403';
 
 // Pages - Lazy loaded for better performance
 const Home = lazy(() => import('../pages/Home'));
@@ -84,6 +85,14 @@ export const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback />}>
                         <Register />
+                    </Suspense>
+                ),
+            },
+            {
+                path: '403',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Forbidden403 />
                     </Suspense>
                 ),
             },
