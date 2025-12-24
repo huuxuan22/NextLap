@@ -1,0 +1,27 @@
+#!/bin/bash
+# Script để push chỉ code frontend
+# Usage: ./frontend/.gitpush "commit message"
+
+cd "$(dirname "$0")/.." || exit 1
+
+# Kiểm tra xem có thay đổi trong frontend không
+if git diff --quiet frontend/ && git diff --cached --quiet frontend/; then
+    echo "No changes in frontend/"
+    exit 0
+fi
+
+# Add chỉ frontend
+git add frontend/
+
+# Commit với message
+if [ -z "$1" ]; then
+    git commit -m "Update frontend"
+else
+    git commit -m "$1"
+fi
+
+# Push
+git push
+
+echo "✅ Frontend code pushed successfully!"
+

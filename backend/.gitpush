@@ -1,0 +1,27 @@
+#!/bin/bash
+# Script để push chỉ code backend
+# Usage: ./backend/.gitpush "commit message"
+
+cd "$(dirname "$0")/.." || exit 1
+
+# Kiểm tra xem có thay đổi trong backend không
+if git diff --quiet backend/ && git diff --cached --quiet backend/; then
+    echo "No changes in backend/"
+    exit 0
+fi
+
+# Add chỉ backend
+git add backend/
+
+# Commit với message
+if [ -z "$1" ]; then
+    git commit -m "Update backend"
+else
+    git commit -m "$1"
+fi
+
+# Push
+git push
+
+echo "✅ Backend code pushed successfully!"
+
