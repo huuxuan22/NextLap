@@ -12,6 +12,7 @@ import PrivateRoute from './PrivateRoute';
 // Pages - Lazy loaded for better performance
 const Home = lazy(() => import('../pages/Home'));
 const Login = lazy(() => import('../pages/Login'));
+const Register = lazy(() => import('../pages/Register'));
 const Products = lazy(() => import('../pages/Products'));
 const ProductDetail = lazy(() => import('../pages/ProductDetail'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
@@ -78,6 +79,14 @@ export const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
+            {
+                path: 'register',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Register />
+                    </Suspense>
+                ),
+            },
         ],
     },
     {
@@ -115,6 +124,7 @@ export const router = createBrowserRouter([
  * 
  * / → Home (MainLayout)
  * /login → Login (AuthLayout)
+ * /register → Register (AuthLayout)
  * /products → Products (MainLayout)
  * /products/:id → ProductDetail (MainLayout)
  * /admin → Dashboard (AdminLayout, Protected)

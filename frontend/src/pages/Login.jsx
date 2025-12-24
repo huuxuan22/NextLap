@@ -1,29 +1,37 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
-/**
- * Login Component
- * - Full-screen background image với overlay đen mờ
- * - Glassmorphism card đặt bên phải trên desktop, căn giữa trên mobile
- * - Responsive design cho mobile, tablet, desktop
- */
+const loginSchema = yup.object({
+    email: yup
+        .string()
+        .required('Email is required')
+        .email('Invalid email format'),
+    password: yup
+        .string()
+        .required('Password is required')
+        .min(6, 'Password must be at least 6 characters'),
+});
+
 const Login = () => {
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm({
+        resolver: yupResolver(loginSchema),
+        mode: 'onBlur', // Validate on blur for better UX
+    });
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Login data:', formData);
-        // TODO: Implement login logic
+    const onSubmit = async (data) => {
+        try {
+        } catch (error) {
+           
+        }
     };
 
     return (
@@ -31,25 +39,19 @@ const Login = () => {
             className="min-h-screen w-full bg-cover bg-center relative"
             style={{ backgroundImage: "url('/login_bg.png')" }}
         >
-            {/* Overlay màu đen mờ 50% để text trong form dễ đọc */}
             <div className="absolute inset-0 bg-black/50" />
-
-            {/* Login Card Container - Căn giữa trên mobile, căn phải trên desktop */}
             <div className="relative min-h-screen flex items-center sm:justify-center md:justify-end sm:pr-0 md:pr-[200px] p-4">
-                {/* Login Card - Đặt bên phải trên desktop, giữa trên mobile */}
                 <div className="w-full max-w-[420px] md:max-w-[450px]">
-                    {/* Login Card - Màu sắc theo design system */}
                     <div
-                        className="backdrop-blur-md border border-white/10 shadow-2xl rounded-2xl p-6 md:p-8"
-                        style={{ backgroundColor: '#1F2937' }}
+                        className="backdrop-blur-md border border-white/10 shadow-2xl p-6 md:p-8"
+                        style={{ backgroundColor: '#1F2937', borderRadius: '0' }}
                     >
-                        {/* Header Section */}
                         <div className="text-center mb-6 md:mb-8">
                             <h1
                                 className="text-2xl md:text-3xl font-bold mb-2"
-                                style={{ color: '#F9FAFB' }}
+                                style={{ color: '#9CA3AF' }}
                             >
-                                Welcome Back to NextLap
+                                LOGIN
                             </h1>
                             <p
                                 className="text-sm"
@@ -59,57 +61,55 @@ const Login = () => {
                             </p>
                         </div>
 
-                        {/* Login Form */}
-                        <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
-                            {/* Email Input */}
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 md:space-y-6">
                             <div>
                                 <input
                                     type="email"
                                     id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2"
+                                    {...register('email')}
+                                    className="w-full px-4 py-3 border transition-all duration-200 focus:outline-none focus:ring-2"
                                     style={{
                                         backgroundColor: '#111827',
-                                        borderColor: '#374151',
+                                        borderColor: errors.email ? '#EF4444' : '#374151',
                                         color: '#F9FAFB',
+                                        borderRadius: '0',
                                     }}
                                     onFocus={(e) => {
                                         e.target.style.borderColor = '#22C55E';
                                         e.target.style.boxShadow = '0 0 0 3px rgba(34, 197, 94, 0.1)';
                                     }}
                                     onBlur={(e) => {
-                                        e.target.style.borderColor = '#374151';
+                                        e.target.style.borderColor = errors.email ? '#EF4444' : '#374151';
                                         e.target.style.boxShadow = 'none';
                                     }}
                                     placeholder="Email"
                                 />
+                                {errors.email && (
+                                    <p className="mt-1 text-xs" style={{ color: '#EF4444' }}>
+                                        {errors.email.message}
+                                    </p>
+                                )}
                             </div>
 
-                            {/* Password Input */}
                             <div>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? 'text' : 'password'}
                                         id="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        required
-                                        className="w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 pr-12"
+                                        {...register('password')}
+                                        className="w-full px-4 py-3 border transition-all duration-200 focus:outline-none focus:ring-2 pr-12"
                                         style={{
                                             backgroundColor: '#111827',
-                                            borderColor: '#374151',
+                                            borderColor: errors.password ? '#EF4444' : '#374151',
                                             color: '#F9FAFB',
+                                            borderRadius: '0',
                                         }}
                                         onFocus={(e) => {
                                             e.target.style.borderColor = '#22C55E';
                                             e.target.style.boxShadow = '0 0 0 3px rgba(34, 197, 94, 0.1)';
                                         }}
                                         onBlur={(e) => {
-                                            e.target.style.borderColor = '#374151';
+                                            e.target.style.borderColor = errors.password ? '#EF4444' : '#374151';
                                             e.target.style.boxShadow = 'none';
                                         }}
                                         placeholder="Enter your password"
@@ -134,9 +134,13 @@ const Login = () => {
                                         )}
                                     </button>
                                 </div>
+                                {errors.password && (
+                                    <p className="mt-1 text-xs" style={{ color: '#EF4444' }}>
+                                        {errors.password.message}
+                                    </p>
+                                )}
                             </div>
 
-                            {/* Remember Me & Forgot Password */}
                             <div className="flex items-center justify-between">
                                 <label className="flex items-center">
                                     <input
@@ -164,21 +168,29 @@ const Login = () => {
                                 </a>
                             </div>
 
-                            {/* Submit Button */}
                             <button
                                 type="submit"
-                                className="w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                                disabled={isSubmitting}
+                                className="w-full py-3 font-semibold text-white transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                                 style={{
                                     backgroundColor: '#22C55E',
+                                    borderRadius: '0',
                                 }}
-                                onMouseEnter={(e) => e.target.style.backgroundColor = '#16A34A'}
-                                onMouseLeave={(e) => e.target.style.backgroundColor = '#22C55E'}
+                                onMouseEnter={(e) => {
+                                    if (!isSubmitting) {
+                                        e.target.style.backgroundColor = '#16A34A';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isSubmitting) {
+                                        e.target.style.backgroundColor = '#22C55E';
+                                    }
+                                }}
                             >
-                                Sign In
+                                {isSubmitting ? 'Signing in...' : 'Sign In'}
                             </button>
                         </form>
 
-                        {/* Divider */}
                         <div className="mt-6 md:mt-8 mb-4 md:mb-6 flex items-center">
                             <div className="flex-1 border-t" style={{ borderColor: '#374151' }}></div>
                             <span
@@ -190,16 +202,15 @@ const Login = () => {
                             <div className="flex-1 border-t" style={{ borderColor: '#374151' }}></div>
                         </div>
 
-                        {/* Social Login Buttons */}
                         <div className="space-y-3">
-                            {/* Google Login Button */}
                             <button
                                 type="button"
-                                className="w-full py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3 border shadow-sm hover:shadow-md"
+                                className="w-full py-3 font-medium transition-all duration-200 flex items-center justify-center gap-3 border shadow-sm hover:shadow-md"
                                 style={{
                                     backgroundColor: '#111827',
                                     borderColor: '#374151',
                                     color: '#F9FAFB',
+                                    borderRadius: '0',
                                 }}
                                 onMouseEnter={(e) => {
                                     e.target.style.backgroundColor = '#1F2937';
@@ -219,14 +230,14 @@ const Login = () => {
                                 Continue with Google
                             </button>
 
-                            {/* Facebook Login Button */}
                             <button
                                 type="button"
-                                className="w-full py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-3 border shadow-sm hover:shadow-md"
+                                className="w-full py-3 font-medium transition-all duration-200 flex items-center justify-center gap-3 border shadow-sm hover:shadow-md"
                                 style={{
                                     backgroundColor: '#111827',
                                     borderColor: '#374151',
                                     color: '#F9FAFB',
+                                    borderRadius: '0',
                                 }}
                                 onMouseEnter={(e) => {
                                     e.target.style.backgroundColor = '#1F2937';
@@ -244,21 +255,20 @@ const Login = () => {
                             </button>
                         </div>
 
-                        {/* Sign Up Link */}
                         <p
                             className="mt-5 md:mt-6 text-center text-sm"
                             style={{ color: '#9CA3AF' }}
                         >
                             Don't have an account?{' '}
-                            <a
-                                href="#"
+                            <Link
+                                to="/register"
                                 className="font-semibold transition-colors duration-200 hover:underline"
                                 style={{ color: '#22C55E' }}
                                 onMouseEnter={(e) => e.target.style.color = '#16A34A'}
                                 onMouseLeave={(e) => e.target.style.color = '#22C55E'}
                             >
                                 Sign up
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>
