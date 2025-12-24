@@ -12,6 +12,7 @@ class User(Base):
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
     address: Mapped[str | None] = mapped_column(Text, nullable=True)
     avatar: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    password: Mapped[str | None] = mapped_column(String(255), nullable=True)  
     role_id: Mapped[int | None] = mapped_column(
         ForeignKey("roles.id"), nullable=True
     )

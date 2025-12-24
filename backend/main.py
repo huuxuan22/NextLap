@@ -6,6 +6,7 @@ from config.database import engine, Base
 from models import User
 from utils.logger import logger
 from utils import Colors
+from routers.auth_router import auth_router
 
 
 @asynccontextmanager
@@ -62,6 +63,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(auth_router)
 
 @app.get("/")
 async def root():

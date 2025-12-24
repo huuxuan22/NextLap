@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import authApi from '../api/authApi';
 
 const registerSchema = yup.object({
     full_name: yup
@@ -37,8 +38,10 @@ const registerSchema = yup.object({
 });
 
 const Register = () => {
+    const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const {
         register,
@@ -51,14 +54,24 @@ const Register = () => {
 
     const onSubmit = async (data) => {
         try {
-            // Remove confirmPassword before submitting
+            debugger;
+            setErrorMessage('');
             const { confirmPassword, ...submitData } = data;
-            console.log('Register data:', submitData);
-            // TODO: Implement register logic with API call
-            // Example: await registerAPI(submitData);
+            const response = await authApi.register(submitData);
+
+            if (response && (response.code === '201' || response.message === 'register success')) {
+                // navigate('/login', {
+                //     state: { message: 'Registration successful! Please login.' }
+                // });
+            }
         } catch (error) {
+            debugger;
             console.error('Register error:', error);
-            // TODO: Handle error (show toast, etc.)
+            const errorDetail = error?.response?.data?.detail ||
+                error?.response?.data?.message ||
+                error?.message ||
+                'Registration failed. Please try again.';
+            setErrorMessage(errorDetail);
         }
     };
 
@@ -67,14 +80,9 @@ const Register = () => {
             className="min-h-screen w-full bg-cover bg-center relative"
             style={{ backgroundImage: "url('/login_bg.png')" }}
         >
-            {/* Overlay màu đen mờ 50% để text trong form dễ đọc */}
             <div className="absolute inset-0 bg-black/50" />
-
-            {/* Register Card Container - Căn giữa trên mobile, căn phải trên desktop */}
             <div className="relative min-h-screen flex items-center sm:justify-center md:justify-end sm:pr-0 md:pr-[200px] p-4">
-                {/* Register Card - Đặt bên phải trên desktop, giữa trên mobile */}
                 <div className="w-full max-w-[420px] md:max-w-[450px]">
-                    {/* Register Card - Màu sắc theo design system */}
                     <div
                         className="backdrop-blur-md border border-white/10 shadow-2xl p-5 md:p-6"
                         style={{ backgroundColor: '#1F2937', borderRadius: '0' }}
@@ -89,9 +97,21 @@ const Register = () => {
                             </h1>
                         </div>
 
-                        {/* Register Form */}
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
-                            {/* Full Name Input */}
+                            {errorMessage && (
+                                <div
+                                    className="p-3 text-sm rounded"
+                                    style={{
+                                        backgroundColor: '#7F1D1D',
+                                        borderColor: '#EF4444',
+                                        borderWidth: '1px',
+                                        color: '#FCA5A5'
+                                    }}
+                                >
+                                    {errorMessage}
+                                </div>
+                            )}
+
                             <div>
                                 <input
                                     type="text"
