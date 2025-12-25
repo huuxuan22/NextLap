@@ -3,12 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from config.config import settings
 from config.database import engine, Base
-from config.redis import RedisClient
 from config.cloudinary import CloudinaryClient
 from models import User
 from utils.logger import logger
 from utils import Colors
+from utils.email import sendmail
 from routers.auth_router import auth_router
+from fastapi import HTTPException, status
+from pydantic import BaseModel, EmailStr
 
 
 @asynccontextmanager
@@ -33,14 +35,6 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.database_error(str(e))
     
-    # Connect to Redis
-    logger.info("🔌 Connecting to Redis...")
-    try:
-        await RedisClient.get_redis()
-        logger.info(f"✅ Redis connected at {settings.REDIS_HOST}:{settings.REDIS_PORT}")
-    except Exception as e:
-        logger.error(f"❌ Redis connection failed: {str(e)}")
-    
     # Initialize Cloudinary
     logger.info("🔌 Initializing Cloudinary...")
     try:
@@ -58,9 +52,6 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown
-    # Close Redis connection
-    await RedisClient.close_connection()
-    
     print(f"\n{Colors.BRIGHT_RED}{'='*70}{Colors.RESET}")
     print(f"{Colors.BRIGHT_RED}🛑 NEXTLAP API SHUTTING DOWN{Colors.RESET}")
     print(f"{Colors.BRIGHT_RED}{'='*70}{Colors.RESET}\n")
@@ -99,6 +90,55 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+# Email endpoint example
+class EmailRequest(BaseModel):
+    """Schema cho request gửi email"""
+    to_email: EmailStr
+    subject: str
+    content: str
+    title: str = None
+
+
+@app.post("/send-mail")
+async def send_mail(request: EmailRequest):
+    """
+    API endpoint để gửi email với HTML template đẹp
+    
+    Args:
+        request: EmailRequest chứa:
+            - to_email: Địa chỉ email người nhận
+            - subject: Tiêu đề email
+            - content: Nội dung email (HTML)
+            - title: Tiêu đề hiển thị trong email (optional)
+    
+    Returns:
+        dict: Kết quả gửi email
+    """
+    try:
+        result = await sendmail(
+            to_email=request.to_email,
+            subject=request.subject,
+            content=request.content,
+            title=request.title
+        )
+        
+        if result["success"]:
+            return result
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=result.get("error", "Failed to send email")
+            )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Unexpected error in send_mail endpoint: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
 
 
 

@@ -16,18 +16,19 @@ class Settings(BaseSettings):
     # CORS settings
     CORS_ORIGINS: List[str] = ["*"]
     
-    # Redis settings
-    REDIS_HOST: str = Field("localhost", alias="REDIS_HOST")
-    REDIS_PORT: int = Field(6379, alias="REDIS_PORT")
-    REDIS_PASSWORD: str = Field("", alias="REDIS_PASSWORD")
-    REDIS_DB: int = Field(0, alias="REDIS_DB")
-    REDIS_DECODE_RESPONSES: bool = Field(True, alias="REDIS_DECODE_RESPONSES")
-    
     # Cloudinary settings
     CLOUDINARY_CLOUD_NAME: str = Field(..., alias="CLOUDINARY_CLOUD_NAME")
     CLOUDINARY_API_KEY: str = Field(..., alias="CLOUDINARY_API_KEY")
     CLOUDINARY_API_SECRET: str = Field(..., alias="CLOUDINARY_API_SECRET")
     CLOUDINARY_SECURE: bool = Field(True, alias="CLOUDINARY_SECURE")
+    # Email settings
+    MAIL_SERVER: str = Field("smtp.gmail.com", alias="MAIL_SERVER")
+    MAIL_PORT: int = Field(587, alias="MAIL_PORT")
+    MAIL_USERNAME: str = Field(..., alias="MAIL_USERNAME")
+    MAIL_PASSWORD: str = Field(..., alias="MAIL_PASSWORD")
+    MAIL_USE_TLS: bool = Field(True, alias="MAIL_USE_TLS")
+    MAIL_USE_SSL: bool = Field(False, alias="MAIL_USE_SSL")
+    MAIL_FROM: str = Field(..., alias="MAIL_FROM")
     
     class Config:
         env_file = ".env"
