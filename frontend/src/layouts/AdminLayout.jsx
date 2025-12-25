@@ -11,7 +11,7 @@ const AdminLayout = () => {
     const handleLogout = () => {
         // TODO: Implement logout logic
         console.log('Logout clicked');
-        navigate('/login');
+        // navigate('/login');
     };
 
     return (
