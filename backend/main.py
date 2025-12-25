@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from config.config import settings
 from config.database import engine, Base
 from config.redis import RedisClient
+from config.cloudinary import CloudinaryClient
 from models import User
 from utils.logger import logger
 from utils import Colors
@@ -39,6 +40,13 @@ async def lifespan(app: FastAPI):
         logger.info(f"✅ Redis connected at {settings.REDIS_HOST}:{settings.REDIS_PORT}")
     except Exception as e:
         logger.error(f"❌ Redis connection failed: {str(e)}")
+    
+    # Initialize Cloudinary
+    logger.info("🔌 Initializing Cloudinary...")
+    try:
+        CloudinaryClient.initialize()
+    except Exception as e:
+        logger.error(f"❌ Cloudinary initialization failed: {str(e)}")
     
     # Show API documentation URLs
     print(f"\n{Colors.BRIGHT_CYAN}{'='*70}{Colors.RESET}")

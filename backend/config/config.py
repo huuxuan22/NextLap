@@ -23,6 +23,12 @@ class Settings(BaseSettings):
     REDIS_DB: int = Field(0, alias="REDIS_DB")
     REDIS_DECODE_RESPONSES: bool = Field(True, alias="REDIS_DECODE_RESPONSES")
     
+    # Cloudinary settings
+    CLOUDINARY_CLOUD_NAME: str = Field(..., alias="CLOUDINARY_CLOUD_NAME")
+    CLOUDINARY_API_KEY: str = Field(..., alias="CLOUDINARY_API_KEY")
+    CLOUDINARY_API_SECRET: str = Field(..., alias="CLOUDINARY_API_SECRET")
+    CLOUDINARY_SECURE: bool = Field(True, alias="CLOUDINARY_SECURE")
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

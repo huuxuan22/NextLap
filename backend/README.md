@@ -9,6 +9,8 @@ Backend API được xây dựng với FastAPI, SQLAlchemy 2.x và Alembic cho M
 - **Alembic** - Database migration tool
 - **MySQL** - Database
 - **Pydantic** - Data validation
+- **Cloudinary** - Cloud-based image and video management
+- **Redis** - In-memory data store
 - **Python 3.11+**
 
 ## 📁 Cấu trúc dự án
@@ -20,7 +22,9 @@ backend/
 │   └── env.py
 ├── config/               # Configuration
 │   ├── config.py         # Settings từ .env
-│   └── database.py       # Database setup
+│   ├── database.py       # Database setup
+│   ├── redis.py          # Redis configuration
+│   └── cloudinary.py     # Cloudinary configuration
 ├── models/               # SQLAlchemy Models
 │   ├── brand.py
 │   ├── category.py
@@ -80,10 +84,35 @@ cp .env.example .env
 Cập nhật các giá trị trong `.env`:
 
 ```env
+# Database
 DATABASE_URL=mysql+pymysql://user:password@localhost:3306/phone_store
+
+# Security
 SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# App
+APP_NAME=NextLap API
 DEBUG=True
+VERSION=1.0.0
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+CLOUDINARY_SECURE=True
 ```
+
+**Lưu ý:** Để lấy thông tin Cloudinary:
+1. Đăng ký tài khoản tại [cloudinary.com](https://cloudinary.com)
+2. Vào Dashboard và lấy `Cloud Name`, `API Key`, và `API Secret`
 
 ### 5. Tạo database
 
