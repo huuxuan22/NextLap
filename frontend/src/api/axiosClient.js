@@ -29,7 +29,6 @@ axiosClient.interceptors.response.use(
     async (error) => {
         const status = error?.response?.status;
 
-        // Token hết hạn / không hợp lệ
         if (status === 401) {
             clearAuth();
             window.location.href = "/login";
