@@ -10,7 +10,7 @@ Backend API được xây dựng với FastAPI, SQLAlchemy 2.x và Alembic cho M
 - **MySQL** - Database
 - **Pydantic** - Data validation
 - **Cloudinary** - Cloud-based image and video management
-- **Redis** - In-memory data store
+- **FastAPI-Mail** - Email sending functionality
 - **Python 3.11+**
 
 ## 📁 Cấu trúc dự án
@@ -23,7 +23,6 @@ backend/
 ├── config/               # Configuration
 │   ├── config.py         # Settings từ .env
 │   ├── database.py       # Database setup
-│   ├── redis.py          # Redis configuration
 │   └── cloudinary.py     # Cloudinary configuration
 ├── models/               # SQLAlchemy Models
 │   ├── brand.py
@@ -97,22 +96,28 @@ APP_NAME=NextLap API
 DEBUG=True
 VERSION=1.0.0
 
-# Redis
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_PASSWORD=
-REDIS_DB=0
-
 # Cloudinary
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 CLOUDINARY_SECURE=True
+
+# Email (Gmail SMTP)
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_USE_TLS=True
+MAIL_USE_SSL=False
+MAIL_FROM=your-email@gmail.com
 ```
 
-**Lưu ý:** Để lấy thông tin Cloudinary:
-1. Đăng ký tài khoản tại [cloudinary.com](https://cloudinary.com)
-2. Vào Dashboard và lấy `Cloud Name`, `API Key`, và `API Secret`
+**Lưu ý:** 
+- **Cloudinary:** Đăng ký tài khoản tại [cloudinary.com](https://cloudinary.com) và lấy thông tin từ Dashboard
+- **Email (Gmail):** 
+  - Sử dụng email Gmail của bạn
+  - Cần tạo "Mật khẩu ứng dụng" (App Password) thay vì mật khẩu thông thường
+  - Hướng dẫn: Vào Google Account → Security → 2-Step Verification → App passwords
 
 ### 5. Tạo database
 
