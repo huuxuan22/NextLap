@@ -37,7 +37,7 @@ const Contact = () => {
 
             {/* Main content */}
             <div className="bg-white w-full">
-                <div className="max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-start">
+                <div className="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-start">
                 {/* Left: Contact Info */}
                 <div>
                     <h2 className="text-xl font-bold text-gray-800 mb-6">THÔNG TIN LIÊN HỆ</h2>
@@ -121,12 +121,12 @@ const Contact = () => {
 
             {/* Branches */}
             <div className="bg-white">
-                <div className="max-w-7xl mx-auto px-4 py-12">
+                <div className="max-w-5xl mx-auto px-4 py-12">
                     <h2 className="text-center text-2xl font-bold mb-8 text-black">CÁC CHI NHÁNH KHÁC</h2>
                     <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {branches.map((b) => (
                             <div key={b.id} className="bg-white rounded-lg p-6 shadow">
-                                <div className="flex items-start gap-4">
+                                <div className="items-start gap-4">
                                     <div
                                         className="w-12 h-12 rounded-xl flex items-center justify-center"
                                         style={{ background: `linear-gradient(135deg, ${b.colorFrom}, ${b.colorTo})` }}
