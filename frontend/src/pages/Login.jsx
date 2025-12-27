@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import authApi from '../api/authApi';
+import { useToast } from '../components/Toast';
+import { setToken } from '../utils/storage';
 
 const loginSchema = yup.object({
     email: yup
@@ -17,6 +20,8 @@ const loginSchema = yup.object({
 
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
+    const { showToast } = useToast();
 
     const {
         register,
@@ -29,8 +34,20 @@ const Login = () => {
 
     const onSubmit = async (data) => {
         try {
+            const response = await authApi.login(data);
+            if (response.data.code === "200") {
+                // Store token in localStorage
+                setToken(response.data.data.access_token);
+                // Store user info if available, or fetch from /me endpoint
+                showToast('Login successful!', 'success');
+                navigate('/'); // Redirect to home
+            } else {
+                showToast(response.data.message || 'Login failed', 'error');
+            }
         } catch (error) {
-           
+            console.error('Login error:', error);
+            const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
+            showToast(errorMessage, 'error');
         }
     };
 

@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 
+
 // Layouts - Loaded immediately (no lazy loading needed for layouts)
 import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
@@ -18,6 +19,8 @@ const Products = lazy(() => import('../pages/Products'));
 const ProductDetail = lazy(() => import('../pages/ProductDetail'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
+const Introduce = lazy(() => import('../pages/Introduce'));
+
 
 /**
  * Loading Component - Shown while lazy-loaded components are loading
@@ -42,12 +45,12 @@ export const router = createBrowserRouter([
         element: <MainLayout />,
         children: [
             {
-                index: true,
+               index: true,
                 element: (
-                    <Suspense fallback={<LoadingFallback />}>
-                        <Home />
-                    </Suspense>
-                ),
+                <Suspense fallback={<LoadingFallback />}>
+                 <Home />
+                </Suspense>
+  ),
             },
             {
                 path: 'products',
@@ -65,39 +68,48 @@ export const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
+            {
+                path: 'introduce',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Introduce />
+                    </Suspense>
+                ),
+            }
         ],
     },
     {
-        // Auth Layout Routes - Authentication pages without header/footer
-        path: '/',
-        element: <AuthLayout />,
-        children: [
-            {
-                path: 'login',
-                element: (
-                    <Suspense fallback={<LoadingFallback />}>
-                        <Login />
-                    </Suspense>
-                ),
-            },
-            {
-                path: 'register',
-                element: (
-                    <Suspense fallback={<LoadingFallback />}>
-                        <Register />
-                    </Suspense>
-                ),
-            },
-            {
-                path: '403',
-                element: (
-                    <Suspense fallback={<LoadingFallback />}>
-                        <Forbidden403 />
-                    </Suspense>
-                ),
-            },
-        ],
+  // Auth Layout Routes - Authentication pages without header/footer
+  path: '/auth',
+  element: <AuthLayout />,
+  children: [
+    {
+      path: 'login',
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Login />
+        </Suspense>
+      ),
     },
+    {
+      path: 'register',
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Register />
+        </Suspense>
+      ),
+    },
+    {
+      path: '403',
+      element: (
+        <Suspense fallback={<LoadingFallback />}>
+          <Forbidden403 />
+        </Suspense>
+      ),
+    },
+  ],
+},
+
     {
         // Admin Layout Routes - Protected admin routes with sidebar
         path: '/admin',
