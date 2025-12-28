@@ -1,12 +1,14 @@
 from typing import List
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
+from urllib.parse import urlparse
 
 class Settings(BaseSettings):
     """Settings class để đọc từ .env file"""
     
     # App settings
     APP_NAME: str = Field("NextLap API", alias="APP_NAME")
+    API_PREFIX: str = Field(..., alias="API_PREFIX")
     DEBUG: bool = Field(False, alias="DEBUG")
     VERSION: str = Field("1.0.0", alias="VERSION")
     DATABASE_URL: str = Field(..., alias="DATABASE_URL")
@@ -30,6 +32,18 @@ class Settings(BaseSettings):
     MAIL_USE_SSL: bool = Field(False, alias="MAIL_USE_SSL")
     MAIL_FROM: str = Field(..., alias="MAIL_FROM")
     
+    @field_validator("API_PREFIX", mode="before")
+    def normalize_api_prefix(cls, v):
+        if isinstance(v, str):
+            if v.startswith("http://") or v.startswith("https://"):
+                parsed = urlparse(v)
+                path = parsed.path
+                if not path or path == "/":
+                    return "/api"
+                return path if path.startswith("/") else "/" + path
+            return v if v.startswith("/") else "/" + v
+        return v
+        
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
