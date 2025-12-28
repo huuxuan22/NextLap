@@ -1,42 +1,81 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import ProductCard from '../components/ProductCard';
+import ProductFilter from '../components/ProductFilter';
+import { productsData } from '../data/productsData';
+import { filterByPriceRange } from '../utils/formatPrice';
 
 /**
- * Products - Product listing page
+ * Products - Trang danh sách sản phẩm laptop
  */
 const Products = () => {
-    // Mock products data
-    const products = [
-        { id: 1, name: 'Product 1', price: '$99.99' },
-        { id: 2, name: 'Product 2', price: '$149.99' },
-        { id: 3, name: 'Product 3', price: '$199.99' },
-    ];
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [priceRange, setPriceRange] = useState('all');
+    const [selectedCpu, setSelectedCpu] = useState('all');
+    const [selectedRam, setSelectedRam] = useState('all');
+    const [selectedGpu, setSelectedGpu] = useState('all');
+
+    // Lọc sản phẩm
+    const filteredProducts = productsData.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.specs.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+        const matchesPrice = filterByPriceRange(product.price, priceRange);
+        const matchesCpu = selectedCpu === 'all' || product.cpu === selectedCpu;
+        const matchesRam = selectedRam === 'all' || product.ram === selectedRam ||
+            (selectedRam === '32GB+' && parseInt(product.ram) >= 32);
+        const matchesGpu = selectedGpu === 'all' || product.gpu === selectedGpu;
+
+        return matchesSearch && matchesCategory && matchesPrice && matchesCpu && matchesRam && matchesGpu;
+    });
 
     return (
-        <div className="max-w-6xl mx-auto">
-            <h1
-                className="text-3xl font-bold mb-8"
-                style={{ color: '#F9FAFB' }}
-            >
-                Products
-            </h1>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {products.map((product) => (
-                    <Link
-                        key={product.id}
-                        to={`/products/${product.id}`}
-                        className="block p-6 rounded-lg transition-transform hover:scale-105"
-                        style={{
-                            backgroundColor: '#1F2937',
-                            color: '#F9FAFB'
-                        }}
+        <div style={{ backgroundColor: '#111827', minHeight: '100vh' }}>
+            <div className="max-w-7xl mx-auto p-6">
+                {/* Header */}
+                <div className="mb-8">
+                    <h1 className="text-4xl font-bold mb-2" style={{ color: '#F9FAFB' }}>
+                        Sản Phẩm Laptop
+                    </h1>
+                    <p style={{ color: '#9CA3AF' }}>
+                        Khám phá bộ sưu tập laptop hiện đại với công nghệ tiên tiến nhất
+                    </p>
+                </div>
+
+                {/* Filter Bar */}
+                <ProductFilter
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    selectedCpu={selectedCpu}
+                    setSelectedCpu={setSelectedCpu}
+                    selectedRam={selectedRam}
+                    setSelectedRam={setSelectedRam}
+                    selectedGpu={selectedGpu}
+                    setSelectedGpu={setSelectedGpu}
+                    resultsCount={filteredProducts.length}
+                />
+
+                {/* Products Grid */}
+                {filteredProducts.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredProducts.map((product) => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                ) : (
+                    <div
+                        className="text-center py-20 rounded-lg"
+                        style={{ backgroundColor: '#1F2937' }}
                     >
-                        <h2 className="text-xl font-semibold mb-2">{product.name}</h2>
-                        <p className="text-lg" style={{ color: '#22C55E' }}>
-                            {product.price}
+                        <p className="text-xl" style={{ color: '#9CA3AF' }}>
+                            Không tìm thấy sản phẩm phù hợp
                         </p>
-                    </Link>
-                ))}
+                    </div>
+                )}
             </div>
         </div>
     );
