@@ -51,10 +51,14 @@ const Login = () => {
     const onSubmit = async (data) => {
         try {
             const response = await authApi.login(data);
-            if (response.data.code === "200") {
+            debugger;
+            if (response.code === "200") {
                 // Store token in localStorage
-                setToken(response.data.data.access_token);
-                // Store user info if available, or fetch from /me endpoint
+                setToken(response.data.access_token);
+                const { access_token, user_principal } = response.data;
+
+                localStorage.setItem("access_token", access_token);
+                localStorage.setItem("user_principal", JSON.stringify(user_principal));
                 showToast({
                     type: 'success',
                     message: 'Đăng nhập thành công!',
