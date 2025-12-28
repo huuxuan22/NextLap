@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Text, ForeignKey
+from sqlalchemy import Boolean, String, Text, ForeignKey
 from config.database import Base
 
 
@@ -16,6 +16,7 @@ class User(Base):
     role_id: Mapped[int | None] = mapped_column(
         ForeignKey("roles.id"), nullable=True
     )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Relationships
     role: Mapped["Roles | None"] = relationship("Roles", back_populates="users")

@@ -9,6 +9,7 @@ from utils.logger import logger
 from utils import Colors
 from utils.email import sendmail
 from routers.auth_router import auth_router
+from middleware.auth_midleware import AuthMiddleware
 from fastapi import HTTPException, status
 from pydantic import BaseModel, EmailStr
 
@@ -66,7 +67,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Cấu hình CORS
+# Cấu hình CORS (phải thêm trước AuthMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -75,8 +76,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth_router)
+# Cấu hình Auth Middleware (xác thực người dùng)
+app.add_middleware(AuthMiddleware)
+
+# Include routers với prefix /api
+app.include_router(auth_router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 async def root():
