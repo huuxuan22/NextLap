@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -21,7 +21,23 @@ const loginSchema = yup.object({
 const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const { showToast } = useToast();
+    const hasShowToast = useRef(false);
+
+    // Hiển thị thông báo từ Register page khi redirect
+    useEffect(() => {
+        if (location.state?.message && !hasShowToast.current) {
+            hasShowToast.current = true;
+            showToast({
+                type: 'success',
+                message: location.state.message,
+                duration: 5000
+            });
+            // Xóa state để không hiển thị lại khi refresh
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, showToast, navigate]);
 
     const {
         register,
@@ -39,15 +55,27 @@ const Login = () => {
                 // Store token in localStorage
                 setToken(response.data.data.access_token);
                 // Store user info if available, or fetch from /me endpoint
-                showToast('Login successful!', 'success');
+                showToast({
+                    type: 'success',
+                    message: 'Đăng nhập thành công!',
+                    duration: 3000
+                });
                 navigate('/'); // Redirect to home
             } else {
-                showToast(response.data.message || 'Login failed', 'error');
+                showToast({
+                    type: 'error',
+                    message: response.data.message || 'Login failed',
+                    duration: 4000
+                });
             }
         } catch (error) {
             console.error('Login error:', error);
             const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
-            showToast(errorMessage, 'error');
+            showToast({
+                type: 'error',
+                message: errorMessage,
+                duration: 4000
+            });
         }
     };
 

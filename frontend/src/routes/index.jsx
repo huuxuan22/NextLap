@@ -46,12 +46,12 @@ export const router = createBrowserRouter([
         element: <MainLayout />,
         children: [
             {
-               index: true,
+                index: true,
                 element: (
-                <Suspense fallback={<LoadingFallback />}>
-                 <Home />
-                </Suspense>
-  ),
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Home />
+                    </Suspense>
+                ),
             },
             {
                 path: 'products',
@@ -78,7 +78,7 @@ export const router = createBrowserRouter([
                     </Suspense>
                 ),
             }
-       , {
+            , {
                 path: 'contact',
                 element: (
                     <Suspense fallback={<LoadingFallback />}>
@@ -89,36 +89,36 @@ export const router = createBrowserRouter([
         ],
     },
     {
-  // Auth Layout Routes - Authentication pages without header/footer
-  path: '/auth',
-  element: <AuthLayout />,
-  children: [
-    {
-      path: 'login',
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <Login />
-        </Suspense>
-      ),
+        // Auth Layout Routes - Authentication pages without header/footer
+        path: '/',
+        element: <AuthLayout />,
+        children: [
+            {
+                path: 'login',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Login />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'register',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Register />
+                    </Suspense>
+                ),
+            },
+            {
+                path: '403',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Forbidden403 />
+                    </Suspense>
+                ),
+            },
+        ],
     },
-    {
-      path: 'register',
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <Register />
-        </Suspense>
-      ),
-    },
-    {
-      path: '403',
-      element: (
-        <Suspense fallback={<LoadingFallback />}>
-          <Forbidden403 />
-        </Suspense>
-      ),
-    },
-  ],
-},
 
     {
         // Admin Layout Routes - Protected admin routes with sidebar

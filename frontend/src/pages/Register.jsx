@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import authApi from '../api/authApi';
+import { useToast } from '../components/Toast';
 
 const registerSchema = yup.object({
     full_name: yup
@@ -39,6 +40,7 @@ const registerSchema = yup.object({
 
 const Register = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -54,24 +56,40 @@ const Register = () => {
 
     const onSubmit = async (data) => {
         try {
-            debugger;
             setErrorMessage('');
             const { confirmPassword, ...submitData } = data;
             const response = await authApi.register(submitData);
 
             if (response && (response.code === '201' || response.message === 'register success')) {
-                // navigate('/login', {
-                //     state: { message: 'Registration successful! Please login.' }
-                // });
+                // Hiển thị toast thành công
+                showToast({
+                    type: 'success',
+                    message: 'Đăng ký thành công!',
+                    duration: 3000
+                });
+
+                // Đợi một chút để toast hiển thị, sau đó redirect
+                setTimeout(() => {
+                    navigate('/login', {
+                        state: {
+                            message: 'Bạn đã đăng ký thành công, vui lòng đăng nhập lại'
+                        }
+                    });
+                }, 1000);
             }
         } catch (error) {
-            debugger;
             console.error('Register error:', error);
             const errorDetail = error?.response?.data?.detail ||
                 error?.response?.data?.message ||
                 error?.message ||
                 'Registration failed. Please try again.';
             setErrorMessage(errorDetail);
+
+            showToast({
+                type: 'error',
+                message: errorDetail,
+                duration: 4000
+            });
         }
     };
 
