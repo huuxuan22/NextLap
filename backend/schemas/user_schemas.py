@@ -1,6 +1,9 @@
+import email
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
+
+from utils import password
 
 
 class UserBase(BaseModel):
@@ -43,6 +46,9 @@ class RegisterSchema(BaseModel):
     phone: Optional[str] = Field(None, max_length=20)
     address: Optional[str] = None
 
+class LoginSchemas(BaseModel):
+    email: EmailStr
+    password: str = Field
 
 class UserSchema(BaseModel):
     """Schema for user response (without password)"""
@@ -57,7 +63,11 @@ class UserSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class LoginResponseSchema(BaseModel):
+    access_token: str
+    user_principal: UserSchema
 
-
+    class Config:
+        from_attributes = True
 
 

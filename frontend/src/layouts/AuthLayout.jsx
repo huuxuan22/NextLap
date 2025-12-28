@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
 /**
  * AuthLayout - Minimal layout with only centered content
@@ -7,6 +7,13 @@ import { Outlet } from 'react-router-dom';
  * No header or footer - clean and focused
  */
 const AuthLayout = () => {
+    const token = localStorage.getItem("access_token");
+    const user_principal = localStorage.getItem("user_principal");
+
+    if (token && user_principal) {
+        return <Navigate to="/" replace />;
+    }
+
     return (
         <div
             className="min-h-screen flex items-center justify-center"
