@@ -6,6 +6,7 @@ from utils.auth import validate_token
 from config.config import settings
 from config.database import SessionLocal
 from models.user import User
+from config.context import current_user
 
 async def authenticate_user(request: Request):
     auth_header = request.headers.get("Authorization")
@@ -36,7 +37,7 @@ async def authenticate_user(request: Request):
         
         if not user.is_active:
             raise HTTPException(status_code=403, detail="Tài khoản đã bị khoá")
-
+        current_user.set(user)
         request.state.user = user
     finally:
         db.close()

@@ -9,6 +9,7 @@ from utils.logger import logger
 from utils import Colors
 from utils.email import sendmail
 from routers.auth_router import auth_router
+from routers.user_router import user_router
 from middleware.auth_midleware import AuthMiddleware
 from fastapi import HTTPException, status
 from pydantic import BaseModel, EmailStr
@@ -81,6 +82,7 @@ app.add_middleware(AuthMiddleware)
 
 # Include routers với prefix /api
 app.include_router(auth_router, prefix=settings.API_PREFIX)
+app.include_router(user_router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 async def root():
