@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from config.config import settings
 from datetime import datetime, timedelta, timezone
 from jose import jwt, JWTError
+from jose.exceptions import ExpiredSignatureError
 
 class TokenData(BaseModel):
     email: Optional[str] = None
@@ -16,7 +17,7 @@ def generate_token(data: dict[str, Any], exprices_delta: Optional[int] = None) -
         else:
             to_encode[key] = value
     exprice = datetime.now(timezone.utc) + timedelta(
-        seconds=exprices_delta if exprices_delta else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=exprices_delta if exprices_delta else settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     to_encode.update({"exp": int(exprice.timestamp())})
     encode_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -27,6 +28,8 @@ def extract_all_claims(token: str) -> dict[str,Any]:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token đã hết hạn. Vui lòng đăng nhập lại.")
     except JWTError as e:
         raise HTTPException(status_code=401, detail="Token không hợp lệ")
 
@@ -67,9 +70,10 @@ def is_token_expired(token: str) -> bool:
 
 # xác thực token - hỗ trợ cả case có email và không có email (Facebook)
 def validate_token(token: str) -> dict[str,Any]:
+    role = extract_role(token)
     email = extract_email(token)
     user_id = extract_id(token)
-    role = extract_role(token)
+    
     
     # Phải có ít nhất id hoặc email, và phải có role
     if not user_id and not email:

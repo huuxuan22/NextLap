@@ -5,11 +5,12 @@ from sqlalchemy.exc import IntegrityError
 from utils.auth import generate_token
 from config.database import get_db
 from models.user import User
+from models.role import Roles
 from schemas.user_schemas import LoginResponseSchema, LoginSchemas, RegisterSchema, UserSchema
 from schemas.base_schema import DataResponse
 from constants.role import ROLE_REGISTER_DEFAULT
 from utils.password import hash_password, verify_password
-
+from fastapi.encoders import jsonable_encoder
 auth_router = APIRouter(
     prefix="/auth",
     tags=["auth"],
@@ -87,6 +88,7 @@ async def login(
 ):
     try:
         existing_user = db.query(User).filter(User.email == data.email).first()
+        role = jsonable_encoder(existing_user.role)
         if not existing_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -102,7 +104,7 @@ async def login(
                 data={
                     "sub": str(existing_user.id),
                     "email": existing_user.email,
-                    "role_id": existing_user.role_id,
+                    "role": role['name'],
                 }
             )
 
