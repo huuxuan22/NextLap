@@ -1,36 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import {
+    HeroSection,
+    CategorySection,
+    FeaturedProducts,
+    PromoBanner,
+    WhyChooseUs,
+    Newsletter
+} from '../components/home';
 
 /**
  * Home - Landing page component
+ * Trang chủ NextLap với đầy đủ các section
  */
 const Home = () => {
     return (
-        <div className="max-w-6xl mx-auto">
-            <section className="text-center py-16">
-                <h1
-                    className="text-5xl font-bold mb-4"
-                    style={{ color: '#F9FAFB' }}
-                >
-                    Welcome to NextLap
-                </h1>
-                <p
-                    className="text-xl mb-8"
-                    style={{ color: '#9CA3AF' }}
-                >
-                    Your one-stop shop for the latest technology
-                </p>
-                <Link
-                    to="/products"
-                    className="inline-block px-8 py-3 rounded-lg font-semibold transition-all transform hover:scale-105"
-                    style={{
-                        backgroundColor: '#22C55E',
-                        color: '#F9FAFB'
-                    }}
-                >
-                    Browse Products
-                </Link>
-            </section>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            {/* Hero Banner */}
+            <HeroSection />
+
+            {/* Danh mục sản phẩm */}
+            <CategorySection />
+
+            {/* Banner khuyến mãi */}
+            <PromoBanner />
+
+            {/* Sản phẩm nổi bật */}
+            <FeaturedProducts />
+
+            {/* Tại sao chọn chúng tôi */}
+            <WhyChooseUs />
+
+            {/* Đăng ký nhận tin */}
+            <Newsletter />
         </div>
     );
 };
