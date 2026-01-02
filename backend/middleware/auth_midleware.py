@@ -55,6 +55,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     __disable_auth_paths = [
         "/auth/login",
         "/auth/register",  
+        "/demo"
     ]
 
     __prefix_paths = [
