@@ -12,6 +12,7 @@ from controllers.auth_controller import auth_router
 from middleware.auth_midleware import AuthMiddleware
 from fastapi import HTTPException, status
 from pydantic import BaseModel, EmailStr
+from controllers.brand_controller import brand_router
 
 
 @asynccontextmanager
@@ -81,6 +82,7 @@ app.add_middleware(AuthMiddleware)
 
 # Include auth router
 app.include_router(auth_router, prefix=settings.API_PREFIX)
+app.include_router(brand_router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 async def root():
