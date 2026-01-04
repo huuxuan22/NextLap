@@ -20,8 +20,6 @@ const AuthLayout = () => {
             <main className="flex-1 flex items-center justify-center">
                 <Outlet />
             </main>
-
-            <Footer />
         </div>
     );
 };

@@ -11,6 +11,7 @@ from controllers.auth_controller import auth_router
 from middleware.auth_midleware import AuthMiddleware
 from controllers.brand_controller import brand_router
 from controllers.user_controller import user_router
+from starlette.middleware.sessions import SessionMiddleware
 
 
 @asynccontextmanager
@@ -72,6 +73,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.SECRET_KEY,
 )
 
 # Cấu hình Auth Middleware (xác thực người dùng)
