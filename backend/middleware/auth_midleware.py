@@ -55,7 +55,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
     __disable_auth_paths = [
         "/auth/login",
         "/auth/register",  
-        "/demo"
+        "/demo",
+        "/auth/google/login",
+        "/auth/google/callback" 
     ]
 
     __prefix_paths = [

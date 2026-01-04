@@ -6,6 +6,7 @@ import AdminLayout from '../layouts/AdminLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import PrivateRoute from './PrivateRoute';
 import Forbidden403 from '../pages/Forbidden403';
+import AuthCallback from '../hooks/useCallback';
 
 const Home = lazy(() => import('../pages/Home'));
 const Login = lazy(() => import('../pages/Login'));
@@ -89,6 +90,14 @@ export const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
+            {
+                path: '/auth/callback',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <AuthCallback />
+                    </Suspense>
+                )
+            }
         ],
     },
     {

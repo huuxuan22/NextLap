@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
+from config.config import settings
 from schemas.user_schemas import RegisterSchema, LoginSchemas, LoginResponseSchema, UserSchema
 from schemas.base_schema import DataResponse
 from services.auth_service import AuthService
@@ -83,3 +85,50 @@ async def login(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred: {str(e)}"
         )
+
+@auth_router.get("/google/login")
+async def facebook(request: Request):
+    return await AuthService.get_google_redirect_uri(request)
+
+@auth_router.get("/google/callback")
+async def Google(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    result: LoginResponseSchema = await AuthService.handle_google_callback(request, db=db)
+
+    # Encode user data
+    import urllib.parse
+    user_data_json = result.user_principal.model_dump_json()
+    user_data_encoded = urllib.parse.quote(user_data_json)
+    
+    redirect_url = (
+        f"{settings.FRONTEND_URL}/auth/callback?"
+        f"oauth=google&status=success"
+        f"&access_token={result.access_token}"
+        f"&user_data={user_data_encoded}"
+)
+    
+    redirect_response = RedirectResponse(url=redirect_url)
+    
+    redirect_response.set_cookie(
+        key="token_access", 
+        value=result.access_token, 
+        httponly=True, 
+        secure=True, 
+        samesite="none",
+        domain="localhost",
+        path="/"
+    )
+    
+    redirect_response.set_cookie(
+        key="current_user", 
+        value=result.user_principal.email, 
+        httponly=False, 
+        secure=True, 
+        samesite="none",
+        domain="localhost",
+        path="/"
+    )
+    
+    return redirect_response
