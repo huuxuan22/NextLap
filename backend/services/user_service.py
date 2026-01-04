@@ -1,11 +1,17 @@
 from sqlalchemy.orm import Session
+<<<<<<< HEAD
 from models.user import User
 from typing import List, Optional
 from fastapi import HTTPException, status
+=======
+from typing import List
+from models.user import User
+>>>>>>> b2e45d6 (crud for user)
 
 class UserService:
     
     @staticmethod
+<<<<<<< HEAD
     def get_all_users(page: Optional[int], limit: Optional[int],search: Optional[str],  db: Session) -> List[User]:
         query = db.query(User).filter(User.role_id==2)
         
@@ -51,3 +57,23 @@ class UserService:
         db.refresh(user)
         
         return user
+=======
+    def get_user_by_id(db: Session, user_id: int) -> User:
+        return db.query(User).filter(User.id == user_id).first()
+
+    @staticmethod
+    def get_all_users(db: Session, page: int = 1, limit: int = 10) -> List[User]:
+        return db.query(User).offset((page - 1) * limit).limit(limit).all()
+
+    @staticmethod
+    def get_user_by_email(db: Session, email: str) -> User:
+        return db.query(User).filter(User.email == email).first()
+
+    @staticmethod
+    def get_user_by_phone(db: Session, phone: str) -> User:
+        return db.query(User).filter(User.phone == phone).first()
+
+    @staticmethod
+    def get_user_by_address(db: Session, address: str) -> User:
+        return db.query(User).filter(User.address == address).first()
+>>>>>>> b2e45d6 (crud for user)
