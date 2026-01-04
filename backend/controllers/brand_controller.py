@@ -60,13 +60,6 @@ async def create_brand(data : BrandCreateSchema, db: Session = Depends(get_db)):
 async def update_brand(id: int, data : BrandUpdateSchema, db: Session = Depends(get_db)):
     updated_brand = BrandService.update_brand(id, data, db)
     
-    if not updated_brand:
-        return DataResponse.custom_response(
-            data=updated_brand,
-            code="404",
-            message="brand not found"
-        )
-    
     return DataResponse.custom_response(
         data=updated_brand,
         code="200",
@@ -76,13 +69,6 @@ async def update_brand(id: int, data : BrandUpdateSchema, db: Session = Depends(
 @brand_router.delete("/{id}",response_model=DataResponse[Optional[bool]])
 async def delete_brand(id: int, db: Session = Depends(get_db)):
     result = BrandService.delete_brand(id, db)
-    
-    if not result:
-        return DataResponse.custom_response(
-            data=result,
-            code="404",
-            message="brand not found"
-        )
     
     return DataResponse.custom_response(
         data=result,
