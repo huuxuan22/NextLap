@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 /**
  * AuthLayout - Minimal layout with only centered content
@@ -15,11 +16,12 @@ const AuthLayout = () => {
     }
 
     return (
-        <div
-            className="min-h-screen flex items-center justify-center"
-            style={{ backgroundColor: '#111827' }}
-        >
-            <Outlet />
+        <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#111827' }}>
+            <main className="flex-1 flex items-center justify-center">
+                <Outlet />
+            </main>
+
+            <Footer />
         </div>
     );
 };
