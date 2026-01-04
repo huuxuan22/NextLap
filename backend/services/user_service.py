@@ -2,6 +2,8 @@ from sqlalchemy.orm import Session
 from models.user import User
 from typing import List, Optional
 from fastapi import HTTPException, status
+from typing import List
+from models.user import User
 
 class UserService:
     
