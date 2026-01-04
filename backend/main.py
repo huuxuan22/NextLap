@@ -9,14 +9,9 @@ from utils.logger import logger
 from utils import Colors
 from controllers.auth_controller import auth_router
 from middleware.auth_midleware import AuthMiddleware
-<<<<<<< HEAD
-from fastapi import HTTPException, status
-from pydantic import BaseModel, EmailStr
 from controllers.brand_controller import brand_router
 from controllers.user_controller import user_router
 
-=======
->>>>>>> b2e45d6 (crud for user)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -82,13 +77,9 @@ app.add_middleware(
 # Cấu hình Auth Middleware (xác thực người dùng)
 app.add_middleware(AuthMiddleware)
 app.include_router(auth_router, prefix=settings.API_PREFIX)
-<<<<<<< HEAD
 app.include_router(brand_router, prefix=settings.API_PREFIX)
 app.include_router(user_router, prefix=settings.API_PREFIX)
-=======
-app.include_router(user_router, prefix=settings.API_PREFIX)
 # Register auth endpoints from controller
->>>>>>> b2e45d6 (crud for user)
 
 @app.get("/")
 async def root():
