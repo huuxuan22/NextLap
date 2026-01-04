@@ -16,6 +16,8 @@ const Contact = lazy(() => import('../pages/Contact'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 const Introduce = lazy(() => import('../pages/Introduce'));
+const Profile = lazy(() => import('../pages/Profile'));
+const ProfileEdit = lazy(() => import('../pages/ProfileEdit'));
 
 const LoadingFallback = () => (
     <div
@@ -68,6 +70,22 @@ export const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback />}>
                         <Contact />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'profile',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Profile />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'profile/edit',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <ProfileEdit />
                     </Suspense>
                 ),
             },
