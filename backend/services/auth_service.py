@@ -1,4 +1,8 @@
 """Auth Service - Business logic layer for authentication"""
+from errno import errorcode
+from fastapi.responses import RedirectResponse
+import httpx
+from sqlalchemy import update
 from sqlalchemy.orm import Session
 from config.config import settings
 from models.user import User
@@ -135,3 +139,95 @@ class AuthService:
 
         return login_response
 
+    @staticmethod
+    async def get_facebook_redirect_uri(request):
+        # Redirect người dùng tới Facebook OAuth
+        # Scope cần thiết: public_profile (mặc định) và email (cần permission)
+        fb_auth_url = (
+            f"https://www.facebook.com/v18.0/dialog/oauth?"
+            f"client_id={settings.FACEBOOK_APP_ID}&"
+            f"redirect_uri={settings.BACKEND_URL}/auth/facebook/callback&"
+            f"response_type=code&"
+            f"scope=public_profile,email"  
+        )
+        return RedirectResponse(fb_auth_url)
+
+    @staticmethod
+    async def handle_facebook_callback( request, db: Session) -> LoginResponseSchema:
+        code = request.query_params.get("code")
+        if not code:
+            raise HTTPException(status_code=400, detail="Không có code bảo vệ của facebook")
+
+        token_url = (
+            f"https://graph.facebook.com/v16.0/oauth/access_token?"
+            f"client_id={settings.FACEBOOK_APP_ID}&"
+            f"redirect_uri={settings.BACKEND_URL}/auth/facebook/callback&"
+            f"client_secret={settings.FACEBOOK_APP_SECRET}&"
+            f"code={code}"
+        )
+
+        async with httpx.AsyncClient() as client:
+            token_res = await client.get(token_url)
+            token_data = token_res.json()
+            fb_access_token = token_data.get("access_token")
+            if not fb_access_token:
+                raise HTTPException(status_code=400, detail="Không thể lấy token từ facebook")
+
+            # 2. Lấy user info từ Facebook (id, name, email)
+            profile_url = "https://graph.facebook.com/me"
+            params = {"fields": "id,name,email,picture", "access_token": fb_access_token}
+            profile_res = await client.get(profile_url, params=params)
+            user_info = profile_res.json()
+
+        email = user_info.get("email")
+        name = user_info.get("name")
+        picture = None
+        pic_data = user_info.get("picture")
+        if isinstance(pic_data, dict):
+            picture = pic_data.get("data", {}).get("url")
+
+        # 3. Tìm user theo name và is_login="FACEBOOK" (không dùng email)
+        existing_user = db.query(User).filter(
+            User.full_name == name,
+            User.is_login == "FACEBOOK"
+        ).first()
+        
+        if existing_user:
+            if existing_user.is_active is False:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Tài khoản đã bị khoá")
+            db_user = existing_user
+            # Nếu user đã có email từ lần trước và giờ Facebook trả về email, cập nhật
+            if email and not db_user.email:
+                db_user["email"] = email
+                db.execute(
+                    update(User).where(User.id == db_user.id).values(email)
+                )
+        else:
+            new_user = User(
+                email=email,
+                full_name=name,
+                avatar=picture,
+                is_active=True,
+                role_id=ROLE_REGISTER_DEFAULT,
+                password=None  
+            )
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            db_user = new_user
+
+        role = jsonable_encoder(db_user.role)
+        
+        access_token = generate_token(
+            data={
+                "sub": str(db_user.id),
+                "email": db_user.email,
+                "role": role['name'],
+            }
+        )
+        login_response = LoginResponseSchema(
+            access_token=access_token,
+            user_principal=UserSchema.model_validate(db_user)
+        )
+
+        return login_response
