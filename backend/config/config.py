@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     GOOGLE_SERVER_METADATA_URL: str = Field(..., alias="GOOGLE_SERVER_METADATA_URL")
     GOOGLE_CLIENT_KWARGS: dict = Field(..., alias="GOOGLE_CLIENT_KWARGS")
     GOOGLE_REDIRECT_URI: AnyHttpUrl = Field(..., alias="GOOGLE_REDIRECT_URI")
+
+    FACEBOOK_APP_ID: str = Field(..., alias="FACEBOOK_APP_ID")
+    FACEBOOK_APP_SECRET: str = Field(..., alias="FACEBOOK_APP_SECRET")
     
     @field_validator("API_PREFIX", mode="before")
     def normalize_api_prefix(cls, v):

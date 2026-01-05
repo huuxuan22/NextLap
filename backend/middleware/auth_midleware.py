@@ -57,7 +57,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/auth/register",  
         "/demo",
         "/auth/google/login",
-        "/auth/google/callback" 
+        "/auth/google/callback",
+        "/auth/facebook/login",
+        "/auth/facebook/callback" 
     ]
 
     __prefix_paths = [

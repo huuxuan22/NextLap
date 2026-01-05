@@ -11,6 +11,7 @@ import * as yup from "yup";
 import authApi from "../api/authApi";
 import { useToast } from "../components/Toast";
 import { setToken } from "../utils/storage";
+import Spinner from "../components/Spinner.jsx";
 
 const loginSchema = yup.object({
     email: yup
@@ -31,16 +32,9 @@ const Login = () => {
     const hasShowToast = useRef(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isClosePopup, setIsClosePopup] = useState(false);
-    const [searchParams] = useSearchParams();
-
-    const oauth = searchParams.get("oauth");
-    const status = searchParams.get("status");
 
     useEffect(() => {
         const handleMessage = (event) => {
-            debugger;
-            console.log("[Login] message event:", event.origin, event.data);
-
             if (event.data?.type !== "OAUTH_RESPONSE") return;
 
             if (
@@ -58,9 +52,6 @@ const Login = () => {
             const { status, oauth, accessToken, userData } = event.data;
 
             if (status === "success" && accessToken) {
-                console.log(`${oauth} login successful`, userData);
-
-                // Lưu token và user data
                 setToken(accessToken);
                 localStorage.setItem("access_token", accessToken);
                 if (userData) {
@@ -87,6 +78,7 @@ const Login = () => {
             }
 
             setIsClosePopup(false);
+            setIsLoading(false)
         };
 
         window.addEventListener("message", handleMessage);
@@ -118,6 +110,7 @@ const Login = () => {
     });
 
     const onSubmit = async (data) => {
+        setIsLoading(true);
         try {
             const response = await authApi.login(data);
             debugger;
@@ -127,11 +120,13 @@ const Login = () => {
 
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("user_principal", JSON.stringify(user_principal));
+
                 showToast({
                     type: "success",
                     message: "Đăng nhập thành công!",
                     duration: 3000,
                 });
+
                 navigate("/"); // Redirect to home
             } else {
                 showToast({
@@ -143,18 +138,39 @@ const Login = () => {
         } catch (error) {
             console.error("Login error:", error);
             const errorMessage =
-                error.response?.data?.detail || "Login failed. Please try again.";
+                error.response?.data?.detail || "Đăng nhập thất bại vui lòng đăng nhập lại";
             showToast({
                 type: "error",
                 message: errorMessage,
                 duration: 4000,
             });
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleLoginGoogle = () => {
         setIsClosePopup(true);
         const popup = authApi.loginWithGoogle(); // Bỏ await
+
+        if (!popup) {
+            alert("Popup bị chặn! Vui lòng cho phép popup cho trang này.");
+            setIsClosePopup(false);
+            return;
+        }
+
+        // check user đóng popup thủ công
+        const popupCheckInterval = setInterval(() => {
+            if (popup.closed) {
+                clearInterval(popupCheckInterval);
+                setIsClosePopup(false);
+            }
+        }, 500);
+    };
+
+    const handleLoginFacebook = () => {
+        setIsClosePopup(true);
+        const popup = authApi.loginWithFacebook(); // Bỏ await
 
         if (!popup) {
             alert("Popup bị chặn! Vui lòng cho phép popup cho trang này.");
@@ -203,6 +219,7 @@ const Login = () => {
                                     type="email"
                                     id="email"
                                     {...register("email")}
+                                    disabled={isLoading || isClosePopup}
                                     className="w-full px-4 py-3 border transition-all duration-200 focus:outline-none focus:ring-2"
                                     style={{
                                         backgroundColor: "#111827",
@@ -234,6 +251,7 @@ const Login = () => {
                                 <div className="relative">
                                     <input
                                         type={showPassword ? "text" : "password"}
+                                        disabled={isLoading || isClosePopup}
                                         id="password"
                                         {...register("password")}
                                         className="w-full px-4 py-3 border transition-all duration-200 focus:outline-none focus:ring-2 pr-12"
@@ -336,24 +354,31 @@ const Login = () => {
 
                             <button
                                 type="submit"
-                                disabled={isSubmitting}
-                                className="w-full py-3 font-semibold text-white transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                disabled={isLoading || isClosePopup}
+                                className="w-full py-3 font-semibold text-white transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                                 style={{
                                     backgroundColor: "#22C55E",
                                     borderRadius: "0",
                                 }}
                                 onMouseEnter={(e) => {
-                                    if (!isSubmitting) {
+                                    if (!isLoading) {
                                         e.target.style.backgroundColor = "#16A34A";
                                     }
                                 }}
                                 onMouseLeave={(e) => {
-                                    if (!isSubmitting) {
+                                    if (!isLoading) {
                                         e.target.style.backgroundColor = "#22C55E";
                                     }
                                 }}
                             >
-                                {isSubmitting ? "Signing in..." : "Sign In"}
+                                {isLoading ? (
+                                    <>
+                                        <Spinner size="small" color="white" />
+                                        <span>Đang đăng nhập...</span>
+                                    </>
+                                ) : (
+                                    "Sign In"
+                                )}
                             </button>
                         </form>
 
@@ -375,6 +400,44 @@ const Login = () => {
                             <button
                                 type="button"
                                 onClick={() => handleLoginGoogle()}
+                                disabled={isLoading || isClosePopup}
+                                className="w-full py-3 font-medium transition-all duration-200 flex items-center justify-center gap-3 border shadow-sm hover:shadow-md"
+                                style={{
+                                    backgroundColor: "#111827",
+                                    borderColor: "#374151",
+                                    color: "#F9FAFB",
+                                    borderRadius: "0",
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = "#1F2937";
+                                    e.target.style.borderColor = "#4B5563";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = "#111827";
+                                    e.target.style.borderColor = "#374151";
+                                }}
+                            >
+                                {isClosePopup ? (
+                                    <>
+                                        <Spinner size="small" color="white" />
+                                        <span>Đang đăng nhập với Google...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                        </svg>
+                                        Continue with Google
+                                    </>
+                                )}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => handleLoginFacebook()}
                                 disabled={isClosePopup}
                                 className="w-full py-3 font-medium transition-all duration-200 flex items-center justify-center gap-3 border shadow-sm hover:shadow-md"
                                 style={{
@@ -392,60 +455,19 @@ const Login = () => {
                                     e.target.style.borderColor = "#374151";
                                 }}
                             >
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                                        fill="#4285F4"
-                                    />
-                                    <path
-                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                                        fill="#34A853"
-                                    />
-                                    <path
-                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                                        fill="#FBBC05"
-                                    />
-                                    <path
-                                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                                        fill="#EA4335"
-                                    />
-                                </svg>
-                                Continue with Google
-                            </button>
-
-                            <button
-                                type="button"
-                                className="w-full py-3 font-medium transition-all duration-200 flex items-center justify-center gap-3 border shadow-sm hover:shadow-md"
-                                style={{
-                                    backgroundColor: "#111827",
-                                    borderColor: "#374151",
-                                    color: "#F9FAFB",
-                                    borderRadius: "0",
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.backgroundColor = "#1F2937";
-                                    e.target.style.borderColor = "#4B5563";
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.backgroundColor = "#111827";
-                                    e.target.style.borderColor = "#374151";
-                                }}
-                            >
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-                                        fill="#1877F2"
-                                    />
-                                </svg>
-                                Continue with Facebook
+                                {isClosePopup ? (
+                                    <>
+                                        <Spinner size="small" color="white" />
+                                        <span>Đang đăng nhập với Facebook...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="#1877F2" />
+                                        </svg>
+                                        Continue with Facebook
+                                    </>
+                                )}
                             </button>
                         </div>
 

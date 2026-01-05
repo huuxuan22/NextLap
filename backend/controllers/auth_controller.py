@@ -8,6 +8,7 @@ from schemas.user_schemas import RegisterSchema, LoginSchemas, LoginResponseSche
 from schemas.base_schema import DataResponse
 from services.auth_service import AuthService
 from config.database import get_db
+import urllib.parse
 
 auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -41,7 +42,7 @@ async def register(
         if "email" in str(e.orig).lower():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email already registered"
+                detail="Email này đã tồn tại"
             )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -87,11 +88,11 @@ async def login(
         )
 
 @auth_router.get("/google/login")
-async def facebook(request: Request):
+async def login_google(request: Request):
     return await AuthService.get_google_redirect_uri(request)
 
 @auth_router.get("/google/callback")
-async def Google(
+async def google_callback(
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -105,6 +106,52 @@ async def Google(
     redirect_url = (
         f"{settings.FRONTEND_URL}/auth/callback?"
         f"oauth=google&status=success"
+        f"&access_token={result.access_token}"
+        f"&user_data={user_data_encoded}"
+)
+    
+    redirect_response = RedirectResponse(url=redirect_url)
+    
+    redirect_response.set_cookie(
+        key="token_access", 
+        value=result.access_token, 
+        httponly=True, 
+        secure=True, 
+        samesite="none",
+        domain="localhost",
+        path="/"
+    )
+    
+    redirect_response.set_cookie(
+        key="current_user", 
+        value=result.user_principal.email, 
+        httponly=False, 
+        secure=True, 
+        samesite="none",
+        domain="localhost",
+        path="/"
+    )
+    
+    return redirect_response
+
+@auth_router.get("/facebook/login")
+async def login_facebook(request: Request):
+    return await AuthService.get_facebook_redirect_uri(request)
+
+@auth_router.get("/facebook/callback")
+async def facebook_callback(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    result: LoginResponseSchema = await AuthService.handle_facebook_callback(request, db=db)
+
+    # Encode user data
+    user_data_json = result.user_principal.model_dump_json()
+    user_data_encoded = urllib.parse.quote(user_data_json)
+    
+    redirect_url = (
+        f"{settings.FRONTEND_URL}/auth/callback?"
+        f"oauth=facebook&status=success"
         f"&access_token={result.access_token}"
         f"&user_data={user_data_encoded}"
 )
