@@ -24,7 +24,7 @@ class User(Base):
         ForeignKey("roles.id"), nullable=True
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    is_login: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
+    is_login: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     created_at: Mapped[None] = mapped_column(
         TIMESTAMP, server_default=func.current_timestamp(), nullable=False
     )

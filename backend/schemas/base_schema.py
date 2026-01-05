@@ -15,7 +15,8 @@ class DataResponse(BaseModel, Generic[T]):
         cls,
         data: Optional[T] = None,
         code: str = "200",
-        message: str = "success"
+        message: str = "success",
+        pagination=None
     ) -> "DataResponse[T]":
         """
         Create a custom DataResponse instance
@@ -28,5 +29,5 @@ class DataResponse(BaseModel, Generic[T]):
         Returns:
             DataResponse instance
         """
-        return cls(data=data, code=code, message=message)
+        return cls(data=data, code=code, message=message, pagination=pagination)
 
