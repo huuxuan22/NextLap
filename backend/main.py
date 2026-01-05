@@ -8,6 +8,7 @@ from config.cloudinary import CloudinaryClient
 from utils.logger import logger
 from utils import Colors
 from controllers.auth_controller import auth_router
+from controllers.product_controller import product_router
 from middleware.auth_midleware import AuthMiddleware
 from controllers.brand_controller import brand_router
 from controllers.user_controller import user_router
@@ -85,6 +86,10 @@ app.add_middleware(
 
 # Cấu hình Auth Middleware (xác thực người dùng)
 app.add_middleware(AuthMiddleware)
+
+# Include routers
+app.include_router(auth_router, prefix=settings.API_PREFIX)
+app.include_router(product_router, prefix=settings.API_PREFIX)
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 app.include_router(brand_router, prefix=settings.API_PREFIX)
 app.include_router(user_router, prefix=settings.API_PREFIX)
@@ -93,7 +98,6 @@ app.include_router(cart_router, prefix=settings.API_PREFIX)
 app.include_router(dashboard_router, prefix=settings.API_PREFIX)
 
 # Register auth endpoints from controller
-
 
 @app.get("/")
 async def root():

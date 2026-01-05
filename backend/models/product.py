@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Text, Numeric, ForeignKey, TIMESTAMP
+from sqlalchemy import Boolean, String, Text, Numeric, ForeignKey, TIMESTAMP
 from sqlalchemy.sql import func
 from config.database import Base
 
@@ -17,6 +17,8 @@ class Product(Base):
     )
     price: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    deleted_at: Mapped[None] = mapped_column(TIMESTAMP, nullable=True)
     created_at: Mapped[None] = mapped_column(
         TIMESTAMP, server_default=func.current_timestamp(), nullable=False
     )
