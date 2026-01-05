@@ -122,6 +122,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             path = request.url.path
             method = request.method
             
+            # Always bypass authentication for OPTIONS requests (CORS preflight)
+            if method == "OPTIONS":
+                return await call_next(request)
+            
             if not self.should_bypass_auth(path, method):
                 await authenticate_user(request)
 
