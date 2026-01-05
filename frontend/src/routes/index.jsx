@@ -14,6 +14,7 @@ const Register = lazy(() => import('../pages/Register'));
 const Products = lazy(() => import('../pages/Products'));
 const ProductDetail = lazy(() => import('../pages/ProductDetail'));
 const Contact = lazy(() => import('../pages/Contact'));
+const Cart = lazy(() => import('../pages/Cart'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 const Introduce = lazy(() => import('../pages/Introduce'));
@@ -71,6 +72,14 @@ export const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback />}>
                         <Contact />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'cart',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Cart />
                     </Suspense>
                 ),
             },
