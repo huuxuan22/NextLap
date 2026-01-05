@@ -14,6 +14,7 @@ from fastapi import HTTPException, status
 from pydantic import BaseModel, EmailStr
 from controllers.brand_controller import brand_router
 from controllers.user_controller import user_router
+from controllers.dashboard_controller import dashboard_router
 
 
 @asynccontextmanager
@@ -85,6 +86,7 @@ app.add_middleware(AuthMiddleware)
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 app.include_router(brand_router, prefix=settings.API_PREFIX)
 app.include_router(user_router, prefix=settings.API_PREFIX)
+app.include_router(dashboard_router, prefix=settings.API_PREFIX)
 
 @app.get("/")
 async def root():
