@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { FiLock, FiShield, FiEye, FiEyeOff } from 'react-icons/fi';
+import userApi from '../../api/userApi';
+import { toast } from 'react-toastify';
 
 const ProfileSecurity = () => {
     const [oldPass, setOldPass] = useState('');
@@ -8,14 +10,41 @@ const ProfileSecurity = () => {
     const [showOld, setShowOld] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (newPass !== confirmPass) {
-            alert('Mật khẩu xác nhận không khớp!');
+
+        if (!oldPass || !newPass || !confirmPass) {
+            toast.error('Vui lòng điền đầy đủ thông tin!');
             return;
         }
-        alert('Yêu cầu đổi mật khẩu thành công (demo)');
+
+        if (newPass !== confirmPass) {
+            toast.error('Mật khẩu xác nhận không khớp!');
+            return;
+        }
+
+        if (newPass.length < 6) {
+            toast.error('Mật khẩu mới phải có ít nhất 6 ký tự!');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            await userApi.changePassword({
+                current_password: oldPass,
+                new_password: newPass
+            });
+            toast.success('Đổi mật khẩu thành công!');
+            setOldPass('');
+            setNewPass('');
+            setConfirmPass('');
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Đổi mật khẩu thất bại!');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -110,11 +139,14 @@ const ProfileSecurity = () => {
 
                 <button
                     type="submit"
-                    className="w-full relative group py-3 rounded-lg overflow-hidden transition-all hover:scale-[1.02]"
+                    disabled={loading}
+                    className="w-full relative group py-3 rounded-lg overflow-hidden transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500" />
                     <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-100 transition" />
-                    <span className="relative text-white font-medium">Đổi mật khẩu</span>
+                    <span className="relative text-white font-medium">
+                        {loading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+                    </span>
                 </button>
             </form>
         </div>

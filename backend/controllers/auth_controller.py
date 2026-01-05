@@ -87,6 +87,26 @@ async def login(
             detail=f"An error occurred: {str(e)}"
         )
 
+
+@auth_router.get(
+    "/me",
+    response_model=DataResponse[UserSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_current_user(request: Request):
+    """Get current logged in user info"""
+    from middleware.auth_midleware import authenticate_user
+    
+    await authenticate_user(request)
+    user = request.state.user
+    
+    return DataResponse.custom_response(
+        data=user,
+        code="200",
+        message="Get current user successfully"
+    )
+
+
 @auth_router.get("/google/login")
 async def login_google(request: Request):
     return await AuthService.get_google_redirect_uri(request)

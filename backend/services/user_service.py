@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from models.user import User
 from typing import List, Optional
 from fastapi import HTTPException, status
-from typing import List
-from models.user import User
+from utils.password import hash_password, verify_password
+from fastapi.encoders import jsonable_encoder
 
 class UserService:
     
@@ -53,3 +53,49 @@ class UserService:
         db.refresh(user)
         
         return user
+    
+    @staticmethod
+    def update_user_profile(db: Session, user_id: int, update_data: dict):
+        """Update user profile information"""
+        user = db.query(User).filter(User.id == user_id).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Update allowed fields
+        allowed_fields = ['full_name', 'phone', 'address', 'avatar']
+        for field, value in update_data.items():
+            if field in allowed_fields and value is not None:
+                setattr(user, field, value)
+        
+        db.commit()
+        db.refresh(user)
+        
+        return jsonable_encoder(user)
+    
+    @staticmethod
+    def change_password(db: Session, user_id: int, current_password: str, new_password: str):
+        """Change user password"""
+        user = db.query(User).filter(User.id == user_id).first()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Verify current password
+        if not verify_password(current_password, user.password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu hiện tại không đúng"
+            )
+        
+        # Hash and update new password
+        user.password = hash_password(new_password)
+        db.commit()
+        
+        return True

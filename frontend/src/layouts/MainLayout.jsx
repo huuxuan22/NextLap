@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
+import { clearAuth } from "../utils/storage";
 import Footer from "../components/Footer";
 
 const MainLayout = () => {
@@ -9,9 +10,13 @@ const MainLayout = () => {
   // State cho search input
   const [showSearch, setShowSearch] = useState(false);
 
+  // State cho user dropdown
+  const [userDropdown, setUserDropdown] = useState(false);
+
   // Refs để xử lý click ra ngoài
   const productsDropdownRef = useRef(null);
   const searchRef = useRef(null);
+  const userDropdownRef = useRef(null);
 
   // Xử lý click ra ngoài dropdown sản phẩm
   useEffect(() => {
@@ -28,6 +33,12 @@ const MainLayout = () => {
         showSearch
       ) {
         setShowSearch(false);
+      }
+      if (
+        userDropdownRef.current &&
+        !userDropdownRef.current.contains(event.target)
+      ) {
+        setUserDropdown(false);
       }
     };
 
@@ -49,11 +60,32 @@ const MainLayout = () => {
     return Boolean(token && user);
   });
 
+  const [userName, setUserName] = useState(() => {
+    const user = localStorage.getItem("user_principal");
+    if (user) {
+      try {
+        const userData = JSON.parse(user);
+        return userData.email || userData.full_name || "User";
+      } catch {
+        return "User";
+      }
+    }
+    return "User";
+  });
+
   useEffect(() => {
     const handleStorage = () => {
       const token = localStorage.getItem("access_token");
       const user = localStorage.getItem("user_principal");
       setIsLoggedIn(Boolean(token && user));
+      if (user) {
+        try {
+          const userData = JSON.parse(user);
+          setUserName(userData.email || userData.full_name || "User");
+        } catch {
+          setUserName("User");
+        }
+      }
     };
 
     window.addEventListener("storage", handleStorage);
@@ -64,6 +96,14 @@ const MainLayout = () => {
       window.removeEventListener("focus", handleStorage);
     };
   }, []);
+
+  const handleLogout = () => {
+    clearAuth();
+    setIsLoggedIn(false);
+    setUserName("User");
+    setUserDropdown(false);
+    window.location.href = '/login';
+  };
 
   return (
     <div
@@ -83,7 +123,7 @@ const MainLayout = () => {
             {/* Logo với hình ảnh */}
             <Link to="/" className="group flex items-center gap-3 relative">
               {/* Logo container với gradient border */}
-             
+
 
               {/* Text với gradient và animation */}
               <div className="relative">
@@ -130,9 +170,8 @@ const MainLayout = () => {
                 >
                   Sản phẩm
                   <svg
-                    className={`w-4 h-4 transition-transform ${
-                      productsDropdown ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${productsDropdown ? "rotate-180" : ""
+                      }`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -200,7 +239,7 @@ const MainLayout = () => {
               <Link
                 to="/about"
                 className="text-text-light transition-colors hover:no-underline hover:bg-bg-dark hover:text-highlight-hover px-3 py-2 rounded"
-                
+
               >
                 Giới thiệu
               </Link>
@@ -306,25 +345,55 @@ const MainLayout = () => {
                   </Link>
 
                   {/* Người dùng/avatar icon */}
-                  <Link
-                    to="/profile"
-                    className="transition-colors hover:text-green-500"
-                    style={{ color: "#F9FAFB" }}
-                  >
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  <div ref={userDropdownRef} className="relative">
+                    <button
+                      onClick={() => setUserDropdown(!userDropdown)}
+                      className="transition-colors hover:text-green-500"
+                      style={{ color: "#F9FAFB" }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </Link>
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </button>
+
+                    {/* User dropdown menu */}
+                    {userDropdown && (
+                      <div className="absolute top-full right-0 mt-2 w-48 rounded-lg shadow-lg py-2 z-10" style={{ backgroundColor: "#1F2937", borderColor: "#374151" }}>
+                        <div className="px-4 py-2 text-sm border-b" style={{ color: "#F9FAFB", borderColor: "#374151" }}>
+                          {userName}
+                        </div>
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm transition-colors"
+                          style={{ color: "#F9FAFB" }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = "#111827"}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                          onClick={() => setUserDropdown(false)}
+                        >
+                          Thông tin cá nhân
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm transition-colors"
+                          style={{ color: "#F9FAFB" }}
+                          onMouseEnter={(e) => e.target.style.backgroundColor = "#111827"}
+                          onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                        >
+                          Đăng xuất
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <Link
@@ -347,7 +416,7 @@ const MainLayout = () => {
       <main className="flex-1 container mx-auto px-4 py-8">
         <Outlet />
       </main>
-      
+
 
       {/* Footer */}
       <Footer />

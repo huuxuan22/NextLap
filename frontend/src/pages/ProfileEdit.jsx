@@ -1,22 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiCamera, FiSave, FiX, FiArrowLeft } from 'react-icons/fi';
-import { useAuth } from '../features/auth/useAuth';
+import { FiUser, FiMail, FiPhone, FiMapPin, FiCamera, FiSave, FiX, FiArrowLeft, FiLoader } from 'react-icons/fi';
+import userApi from '../api/userApi';
+import { toast } from 'react-toastify';
 
 const ProfileEdit = () => {
     const navigate = useNavigate();
-    const { user } = useAuth();
 
     // Form state
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState({
-        name: user?.name || 'Nguyễn Văn A',
-        email: user?.email || 'nguyenvana@example.com',
-        phone: user?.phone || '0123456789',
-        address: user?.address || '123 Đường ABC, Quận 1, TP.HCM',
-        avatar: user?.avatar || null
+        full_name: '',
+        email: '',
+        phone: '',
+        address: '',
+        avatar: null
     });
 
     const [previewAvatar, setPreviewAvatar] = useState(null);
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
+    const fetchUserData = async () => {
+        try {
+            const response = await userApi.getProfile();
+            const user = response.data;
+            setFormData({
+                full_name: user.full_name || '',
+                email: user.email || '',
+                phone: user.phone || '',
+                address: user.address || '',
+                avatar: user.avatar || null
+            });
+        } catch (error) {
+            console.error('Error fetching user:', error);
+            if (error.response?.status === 401) {
+                window.location.href = '/login';
+            } else {
+                toast.error('Không thể tải thông tin người dùng');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,16 +63,49 @@ const ProfileEdit = () => {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Integrate with API
-        alert('Cập nhật thông tin thành công! (demo)');
-        navigate('/profile');
+        setSaving(true);
+
+        try {
+            const updateData = {
+                full_name: formData.full_name,
+                phone: formData.phone,
+                address: formData.address,
+                // avatar upload will be handled separately
+            };
+
+            await userApi.updateProfile(updateData);
+            toast.success('Cập nhật thông tin thành công!');
+
+            // Update localStorage
+            const userPrincipal = JSON.parse(localStorage.getItem('user_principal') || '{}');
+            const newUserPrincipal = { ...userPrincipal, ...updateData };
+            localStorage.setItem('user_principal', JSON.stringify(newUserPrincipal));
+
+            navigate('/profile');
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            toast.error(error.response?.data?.message || 'Cập nhật thất bại!');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleCancel = () => {
         navigate('/profile');
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#111827' }}>
+                <div className="text-center">
+                    <FiLoader className="animate-spin text-green-400 mx-auto mb-4" size={48} />
+                    <p className="text-gray-400">Đang tải thông tin...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen" style={{ backgroundColor: '#111827' }}>
@@ -70,7 +132,7 @@ const ProfileEdit = () => {
                     <div className="rounded-xl p-8" style={{ backgroundColor: '#1F2937' }}>
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center mb-8">
-                            <div className="relative group mb-4">
+                            <div className="relative gfull_roup mb-4">
                                 <div className="absolute -inset-1 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur opacity-30 group-hover:opacity-50 transition" />
                                 <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center overflow-hidden border-4 border-gray-800">
                                     {previewAvatar || formData.avatar ? (
@@ -113,8 +175,8 @@ const ProfileEdit = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    name="name"
-                                    value={formData.name}
+                                    name="full_name"
+                                    value={formData.full_name}
                                     onChange={handleChange}
                                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-green-500 focus:outline-none transition"
                                     placeholder="Nhập họ và tên"
@@ -132,10 +194,10 @@ const ProfileEdit = () => {
                                     type="email"
                                     name="email"
                                     value={formData.email}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-green-500 focus:outline-none transition"
+                                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-400 cursor-not-allowed"
                                     placeholder="Nhập email"
-                                    required
+                                    disabled
+                                    readOnly
                                 />
                             </div>
 
@@ -177,20 +239,31 @@ const ProfileEdit = () => {
                             <button
                                 type="button"
                                 onClick={handleCancel}
-                                className="px-6 py-3 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 transition flex items-center justify-center gap-2"
+                                disabled={saving}
+                                className="px-6 py-3 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 transition flex items-center justify-center gap-2 disabled:opacity-50"
                             >
                                 <FiX />
                                 <span>Hủy bỏ</span>
                             </button>
                             <button
                                 type="submit"
-                                className="relative group px-6 py-3 rounded-lg overflow-hidden transition-all hover:scale-105"
+                                disabled={saving}
+                                className="relative group px-6 py-3 rounded-lg overflow-hidden transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-500" />
                                 <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-100 transition" />
                                 <div className="relative flex items-center justify-center gap-2 text-white font-medium">
-                                    <FiSave />
-                                    <span>Lưu thay đổi</span>
+                                    {saving ? (
+                                        <>
+                                            <FiLoader className="animate-spin" />
+                                            <span>Đang lưu...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <FiSave />
+                                            <span>Lưu thay đổi</span>
+                                        </>
+                                    )}
                                 </div>
                             </button>
                         </div>

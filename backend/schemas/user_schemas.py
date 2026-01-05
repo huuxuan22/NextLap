@@ -59,6 +59,7 @@ class UserSchema(BaseModel):
     address: Optional[str] = None
     avatar: Optional[str] = None
     role_id: Optional[int] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

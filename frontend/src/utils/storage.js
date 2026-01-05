@@ -5,4 +5,5 @@ export const setToken = (token) =>
 
 export const clearAuth = () => {
   localStorage.removeItem("access_token");
+  localStorage.removeItem("user_principal");
 };

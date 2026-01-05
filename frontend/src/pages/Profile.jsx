@@ -1,10 +1,41 @@
-import React from 'react';
-import { ProfileHeader, ProfileInfo, ProfileOrders, ProfileAddress, ProfileSecurity } from '../components/profile';
-import { useAuth } from '../features/auth/useAuth';
+import React, { useEffect, useState } from 'react';
+import { ProfileHeader, ProfileInfo, ProfileOrders, ProfileSecurity } from '../components/profile';
 import { FiLoader } from 'react-icons/fi';
+import userApi from '../api/userApi';
+import { toast } from 'react-toastify';
 
 const Profile = () => {
-    const { user, loading } = useAuth();
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchUserProfile();
+    }, []);
+
+    const fetchUserProfile = async () => {
+        try {
+            const response = await userApi.getProfile();
+            setUser(response.data);
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            if (error.response?.status === 401) {
+                // Redirect to login if not authenticated
+                window.location.href = '/login';
+            } else {
+                toast.error('Không thể tải thông tin người dùng');
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateProfile = (updatedUser) => {
+        setUser(updatedUser);
+        // Update localStorage
+        const userPrincipal = JSON.parse(localStorage.getItem('user_principal') || '{}');
+        const newUserPrincipal = { ...userPrincipal, ...updatedUser };
+        localStorage.setItem('user_principal', JSON.stringify(newUserPrincipal));
+    };
 
     if (loading) {
         return (
@@ -17,13 +48,18 @@ const Profile = () => {
         );
     }
 
-    // Demo user data if not logged in
-    const profileUser = user || {
-        name: 'Nguyễn Văn A',
-        email: 'nguyenvana@example.com',
-        phone: '0123456789',
-        address: '123 Đường ABC, Quận 1, TP.HCM',
-        joined: 'Tháng 1, 2026'
+    if (!user) {
+        return null;
+    }
+
+    // Format user data for display
+    const profileUser = {
+        name: user.full_name || 'Chưa cập nhật',
+        email: user.email,
+        phone: user.phone || 'Chưa cập nhật',
+        address: user.address || 'Chưa cập nhật',
+        joined: user.created_at ? new Date(user.created_at).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' }) : 'Tháng 1, 2026',
+        ...user
     };
 
     return (
@@ -45,13 +81,12 @@ const Profile = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column - 2/3 width */}
                         <div className="lg:col-span-2 space-y-6">
-                            <ProfileInfo user={profileUser} />
+                            <ProfileInfo user={profileUser} onUpdate={handleUpdateProfile} />
                             <ProfileOrders />
                         </div>
 
                         {/* Right Column - 1/3 width */}
                         <div className="space-y-6">
-                            <ProfileAddress />
                             <ProfileSecurity />
                         </div>
                     </div>

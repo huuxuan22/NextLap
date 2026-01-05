@@ -3,11 +3,12 @@ import axios from "axios";
 import { getToken, clearAuth } from "../utils/storage";
 
 const axiosClient = axios.create({
-    baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api",withCredentials: true,
+    baseURL: process.env.REACT_APP_API_URL || "http://localhost:8000/api/v1",
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
     },
-    timeout: 15000,
+    timeout: 30000,
 });
 
 // ====== ⬇️ REQUEST INTERCEPTOR (tự gắn token) ======

@@ -11,6 +11,7 @@ from controllers.auth_controller import auth_router
 from middleware.auth_midleware import AuthMiddleware
 from controllers.brand_controller import brand_router
 from controllers.user_controller import user_router
+from controllers.order_controller import order_router
 from controllers.dashboard_controller import dashboard_router
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -86,6 +87,7 @@ app.add_middleware(AuthMiddleware)
 app.include_router(auth_router, prefix=settings.API_PREFIX)
 app.include_router(brand_router, prefix=settings.API_PREFIX)
 app.include_router(user_router, prefix=settings.API_PREFIX)
+app.include_router(order_router, prefix=settings.API_PREFIX)
 app.include_router(dashboard_router, prefix=settings.API_PREFIX)
 
 # Register auth endpoints from controller
