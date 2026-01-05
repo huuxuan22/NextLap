@@ -1,6 +1,13 @@
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Boolean, String, Text, ForeignKey
+from sqlalchemy import Boolean, String, Text, ForeignKey, TIMESTAMP
+from sqlalchemy.sql import func
 from config.database import Base
+
+if TYPE_CHECKING:
+    from models.role import Roles
+    from models.order import Order
+    from models.cart import Cart
 
 
 class User(Base):
@@ -17,16 +24,18 @@ class User(Base):
         ForeignKey("roles.id"), nullable=True
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_login: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
+    created_at: Mapped[None] = mapped_column(
+        TIMESTAMP, server_default=func.current_timestamp(), nullable=False
+    )
 
-    # Relationships
-    role: Mapped["Roles | None"] = relationship("Roles", back_populates="users")
+    role: Mapped[Optional["Roles"]] = relationship("Roles", back_populates="users")
     orders: Mapped[list["Order"]] = relationship(
         "Order", back_populates="user", cascade="all, delete-orphan"
     )
-    cart: Mapped["Cart | None"] = relationship(
+    cart: Mapped[Optional["Cart"]] = relationship(
         "Cart", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
-
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
 

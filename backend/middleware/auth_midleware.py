@@ -55,7 +55,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
     __disable_auth_paths = [
         "/auth/login",
         "/auth/register",  
-        "/demo"
+        "/demo",
+        "/auth/google/login",
+        "/auth/google/callback",
+        "/auth/facebook/login",
+        "/auth/facebook/callback" 
     ]
 
     __prefix_paths = [
@@ -117,6 +121,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
         try:
             path = request.url.path
             method = request.method
+            
+            # Always bypass authentication for OPTIONS requests (CORS preflight)
+            if method == "OPTIONS":
+                return await call_next(request)
             
             if not self.should_bypass_auth(path, method):
                 await authenticate_user(request)
