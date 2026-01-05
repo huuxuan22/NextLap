@@ -42,6 +42,7 @@ class AuthService:
             full_name=data.full_name,
             email=data.email,
             phone=data.phone,
+            is_login="NOMAL",
             address=data.address,
             password=hashed_password,
             role_id=ROLE_REGISTER_DEFAULT
@@ -109,12 +110,13 @@ class AuthService:
                 raise ValueError("Tài khoản đã bị khoá")
             db_user = existing_user
         else:
-            new_user = User(
+            new_user = User(    
                 email=email,
                 full_name=name,
                 avatar=picture,
                 is_active=True,
                 role_id=ROLE_REGISTER_DEFAULT,
+                is_login="GOOGLE",
                 password=None  
             )
             
@@ -209,6 +211,7 @@ class AuthService:
                 avatar=picture,
                 is_active=True,
                 role_id=ROLE_REGISTER_DEFAULT,
+                is_login="FACEBOOK",
                 password=None  
             )
             db.add(new_user)

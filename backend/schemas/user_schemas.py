@@ -58,6 +58,7 @@ class UserSchema(BaseModel):
     phone: Optional[str] = None
     address: Optional[str] = None
     avatar: Optional[str] = None
+    is_login: Optional[str] = None
     role_id: Optional[int] = None
     created_at: Optional[datetime] = None
 
