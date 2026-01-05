@@ -1,9 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-/**
- * HeroSection - Banner chính trang chủ
- */
 const HeroSection = () => {
     return (
         <section className="relative overflow-hidden rounded-2xl mb-12">
@@ -69,7 +66,7 @@ const HeroSection = () => {
                         </Link>
 
                         <Link
-                            to="/introduce"
+                            to="/about"
                             className="inline-flex items-center justify-center px-8 py-4 rounded-xl font-semibold transition-all hover:opacity-80"
                             style={{
                                 backgroundColor: 'transparent',

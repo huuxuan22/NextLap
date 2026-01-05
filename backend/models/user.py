@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Boolean, String, Text, ForeignKey
 from config.database import Base
@@ -17,8 +18,8 @@ class User(Base):
         ForeignKey("roles.id"), nullable=True
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_login: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
 
-    # Relationships
     role: Mapped["Roles | None"] = relationship("Roles", back_populates="users")
     orders: Mapped[list["Order"]] = relationship(
         "Order", back_populates="user", cascade="all, delete-orphan"
@@ -26,7 +27,6 @@ class User(Base):
     cart: Mapped["Cart | None"] = relationship(
         "Cart", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
-
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
 

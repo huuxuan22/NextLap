@@ -1,17 +1,13 @@
 import React, { Suspense, lazy } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 
-
-// Layouts - Loaded immediately (no lazy loading needed for layouts)
 import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
 import AuthLayout from '../layouts/AuthLayout';
-
-// Protected Route Component
 import PrivateRoute from './PrivateRoute';
 import Forbidden403 from '../pages/Forbidden403';
+import AuthCallback from '../hooks/useCallback';
 
-// Pages - Lazy loaded for better performance
 const Home = lazy(() => import('../pages/Home'));
 const Login = lazy(() => import('../pages/Login'));
 const Register = lazy(() => import('../pages/Register'));
@@ -21,11 +17,9 @@ const Contact = lazy(() => import('../pages/Contact'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 const Introduce = lazy(() => import('../pages/Introduce'));
+const Profile = lazy(() => import('../pages/Profile'));
+const ProfileEdit = lazy(() => import('../pages/ProfileEdit'));
 
-
-/**
- * Loading Component - Shown while lazy-loaded components are loading
- */
 const LoadingFallback = () => (
     <div
         className="min-h-screen flex items-center justify-center"
@@ -35,13 +29,8 @@ const LoadingFallback = () => (
     </div>
 );
 
-/**
- * Router Configuration
- * Defines all routes, layouts, and route protection
- */
 export const router = createBrowserRouter([
     {
-        // Main Layout Routes - Public pages with header and footer
         path: '/',
         element: <MainLayout />,
         children: [
@@ -70,8 +59,7 @@ export const router = createBrowserRouter([
                 ),
             },
             {
-
-                path: 'introduce',
+                path: 'about',
                 element: (
                     <Suspense fallback={<LoadingFallback />}>
                         <Introduce />
@@ -86,10 +74,33 @@ export const router = createBrowserRouter([
                     </Suspense>
                 ),
             },
+            {
+                path: 'profile',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Profile />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'profile/edit',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <ProfileEdit />
+                    </Suspense>
+                ),
+            },
+            {
+                path: '/auth/callback',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <AuthCallback />
+                    </Suspense>
+                )
+            }
         ],
     },
     {
-        // Auth Layout Routes - Authentication pages without header/footer
         path: '/',
         element: <AuthLayout />,
         children: [
@@ -119,9 +130,7 @@ export const router = createBrowserRouter([
             },
         ],
     },
-
     {
-        // Admin Layout Routes - Protected admin routes with sidebar
         path: '/admin',
         element: (
             <PrivateRoute>
@@ -140,7 +149,6 @@ export const router = createBrowserRouter([
         ],
     },
     {
-        // 404 Route - Catch all unknown routes
         path: '*',
         element: (
             <Suspense fallback={<LoadingFallback />}>
@@ -149,16 +157,4 @@ export const router = createBrowserRouter([
         ),
     },
 ]);
-
-/**
- * Route Structure:
- * 
- * / → Home (MainLayout)
- * /login → Login (AuthLayout)
- * /register → Register (AuthLayout)
- * /products → Products (MainLayout)
- * /products/:id → ProductDetail (MainLayout)
- * /admin → Dashboard (AdminLayout, Protected)
- * * → NotFound (no layout)
- */
 

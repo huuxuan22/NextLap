@@ -2,6 +2,7 @@ from typing import List
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 from urllib.parse import urlparse
+from pydantic import AnyHttpUrl
 
 class Settings(BaseSettings):
     """Settings class để đọc từ .env file"""
@@ -15,7 +16,6 @@ class Settings(BaseSettings):
     SECRET_KEY: str = Field(..., alias="SECRET_KEY")    
     ALGORITHM: str = Field("HS256", alias="ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(30, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
-    # CORS settings
     CORS_ORIGINS: List[str] = ["*"]
     
     # Cloudinary settings
@@ -31,6 +31,18 @@ class Settings(BaseSettings):
     MAIL_USE_TLS: bool = Field(True, alias="MAIL_USE_TLS")
     MAIL_USE_SSL: bool = Field(False, alias="MAIL_USE_SSL")
     MAIL_FROM: str = Field(..., alias="MAIL_FROM")
+    FRONTEND_URL: str = Field(..., alias="FRONTEND_URL")
+    BACKEND_URL: str = Field(..., alias="BACKEND_URL")
+
+    # Google settings
+    GOOGLE_CLIENT_ID: str = Field(..., alias="GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str = Field(..., alias="GOOGLE_CLIENT_SECRET")
+    GOOGLE_SERVER_METADATA_URL: str = Field(..., alias="GOOGLE_SERVER_METADATA_URL")
+    GOOGLE_CLIENT_KWARGS: dict = Field(..., alias="GOOGLE_CLIENT_KWARGS")
+    GOOGLE_REDIRECT_URI: AnyHttpUrl = Field(..., alias="GOOGLE_REDIRECT_URI")
+
+    FACEBOOK_APP_ID: str = Field(..., alias="FACEBOOK_APP_ID")
+    FACEBOOK_APP_SECRET: str = Field(..., alias="FACEBOOK_APP_SECRET")
     
     @field_validator("API_PREFIX", mode="before")
     def normalize_api_prefix(cls, v):

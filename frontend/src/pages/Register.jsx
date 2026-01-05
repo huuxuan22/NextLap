@@ -61,13 +61,6 @@ const Register = () => {
             const response = await authApi.register(submitData);
 
             if (response && (response.code === '201' || response.message === 'register success')) {
-                // Hiển thị toast thành công
-                showToast({
-                    type: 'success',
-                    message: 'Đăng ký thành công!',
-                    duration: 3000
-                });
-
                 // Đợi một chút để toast hiển thị, sau đó redirect
                 setTimeout(() => {
                     navigate('/login', {
