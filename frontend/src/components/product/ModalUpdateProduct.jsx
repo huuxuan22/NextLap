@@ -6,16 +6,17 @@ import {
   Input,
   Upload,
   InputNumber,
-  Divider,
   Space,
   Modal,
+  Divider,
 } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import productApi from '../../api/productApi';
+import { useToast } from '../../components/Toast';
 
 const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
   const [form] = Form.useForm();
-  const { message, notification } = App.useApp();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
 
@@ -26,7 +27,6 @@ const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
         price: product.price,
         description: product.description,
         brand_id: product.brand_id,
-        category_id: product.category_id,
         quantity_in_stock: product.spec?.quantity_in_stock || 0,
         ram: product.spec?.ram,
         chip: product.spec?.chip,
@@ -56,49 +56,57 @@ const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
       setLoading(true);
 
       const formData = new FormData();
+
       formData.append('name', values.name.trim());
-      formData.append('price', values.price);
       formData.append('description', values.description || '');
-      formData.append('quantity_in_stock', values.quantity_in_stock || 0);
 
-      if (values.brand_id) formData.append('brand_id', values.brand_id);
-      if (values.category_id)
-        formData.append('category_id', values.category_id);
-      if (values.ram) formData.append('ram', values.ram);
-      if (values.chip) formData.append('chip', values.chip);
-      if (values.screen) formData.append('screen', values.screen);
-      if (values.battery) formData.append('battery', values.battery);
-      if (values.camera) formData.append('camera', values.camera);
+      formData.append('price', Number(values.price));
+      formData.append(
+        'quantity_in_stock',
+        Number(values.quantity_in_stock || 0)
+      );
 
-      // Check if there are new files to upload
-      const newFiles = fileList.filter((f) => f.originFileObj);
+      if (values.brand_id) formData.append('brand_id', Number(values.brand_id));
+
+      if (values.ram) formData.append('ram', values.ram.trim());
+      if (values.chip) formData.append('chip', values.chip.trim());
+      if (values.screen) formData.append('screen', values.screen.trim());
+      if (values.battery) formData.append('battery', values.battery.trim());
+      if (values.camera) formData.append('camera', values.camera.trim());
+
+      const newFiles = fileList.filter(
+        (file) => !file.isExisting && file.originFileObj
+      );
+
       if (newFiles.length > 0) {
         newFiles.forEach((file) => {
           formData.append('files', file.originFileObj);
         });
-        // Replace old images
-        formData.append('keep_old_images', false);
-      } else {
-        // Keep old images
-        formData.append('keep_old_images', true);
       }
 
-      await productApi.update(product.id, formData);
+      const response = await productApi.update(product.id, formData);
 
-      message.success('Cập nhật sản phẩm thành công');
+      showToast({
+        type: 'success',
+        message: 'Cập nhật sản phẩm thành công',
+        duration: 3000,
+      });
+
+      handleCancel();
       onSuccess?.();
     } catch (error) {
       console.log('Update Product Error:', error);
 
       const errorMessage =
         error.response?.data?.detail ||
+        error.response?.data?.message ||
         error.message ||
         'Không thể kết nối đến server';
 
-      notification.error({
-        message: 'Cập nhật thất bại',
-        description: errorMessage,
-        duration: 5,
+      showToast({
+        type: 'error',
+        message: `Cập nhật thất bại: ${errorMessage}`,
+        duration: 5000,
       });
     } finally {
       setLoading(false);
@@ -137,12 +145,12 @@ const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
           form={form}
           autoComplete="off"
           onFinish={handleModalUpdateProduct}
-          className="space-y-1"
+          className="space-y-3"
         >
           <Form.Item
             name="name"
             label={
-              <span className="font-medium text-gray-700">Tên sản phẩm *</span>
+              <span className="font-medium text-gray-700">Tên sản phẩm</span>
             }
             rules={[
               { required: true, message: 'Không được để trống tên sản phẩm' },
@@ -159,9 +167,7 @@ const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
 
           <Form.Item
             name="price"
-            label={
-              <span className="font-medium text-gray-700">Giá (VNĐ) *</span>
-            }
+            label={<span className="font-medium text-gray-700">Giá (VNĐ)</span>}
             rules={[
               { required: true, message: 'Không được để trống giá' },
               { type: 'number', min: 0, message: 'Giá phải lớn hơn 0' },
@@ -187,21 +193,6 @@ const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
                 disabled={loading}
                 className="w-full h-10 rounded-lg"
                 placeholder="Nhập ID hãng"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="category_id"
-              label={
-                <span className="font-medium text-gray-700">ID Danh mục</span>
-              }
-              className="mb-4"
-            >
-              <InputNumber
-                min={0}
-                disabled={loading}
-                className="w-full h-10 rounded-lg"
-                placeholder="Nhập ID danh mục"
               />
             </Form.Item>
           </div>
@@ -233,6 +224,12 @@ const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
             />
           </Form.Item>
 
+          <Divider orientation="left" className="mt-10 mb-4">
+            <span className="text-base font-semibold text-gray-700">
+              Thông số kỹ thuật
+            </span>
+          </Divider>
+
           <div className="grid grid-cols-2 gap-4">
             <Form.Item label="RAM" name="ram" className="mb-4">
               <Input placeholder="VD: 8GB" disabled={loading} />
@@ -263,7 +260,7 @@ const ModalUpdateProduct = ({ product, isModalOpen, onCancel, onSuccess }) => {
             }
             className="mb-0"
           >
-            <Form.Item noStyle>
+            <Form.Item noStyle name="files">
               <Upload
                 listType="picture-card"
                 fileList={fileList}

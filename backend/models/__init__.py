@@ -1,6 +1,5 @@
 # Import tất cả models để Alembic có thể auto-detect
 from models.brand import Brand
-from models.category import Category
 from models.product import Product
 from models.product_spec import ProductSpec
 from models.user import User
@@ -13,7 +12,6 @@ from models.role import Roles
 
 __all__ = [
     "Brand",
-    "Category",
     "Product",
     "ProductSpec",
     "User",

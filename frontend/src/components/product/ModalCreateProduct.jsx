@@ -1,12 +1,22 @@
-import { App, Button, Form, Input, Modal, Upload, InputNumber } from 'antd';
+import {
+  App,
+  Button,
+  Form,
+  Input,
+  Modal,
+  Upload,
+  InputNumber,
+  Divider,
+} from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import productApi from '../../api/productApi';
+import { useToast } from '../../components/Toast';
 
 const ModalCreateProduct = (props) => {
   const { loadProducts, isModalCreateOpen, setIsModalCreateOpen } = props;
   const [form] = Form.useForm();
-  const { message, notification } = App.useApp();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
 
@@ -21,8 +31,6 @@ const ModalCreateProduct = (props) => {
       formData.append('quantity_in_stock', values.quantity_in_stock || 0);
 
       if (values.brand_id) formData.append('brand_id', values.brand_id);
-      if (values.category_id)
-        formData.append('category_id', values.category_id);
       if (values.ram) formData.append('ram', values.ram);
       if (values.chip) formData.append('chip', values.chip);
       if (values.screen) formData.append('screen', values.screen);
@@ -38,7 +46,11 @@ const ModalCreateProduct = (props) => {
 
       await productApi.create(formData);
 
-      message.success('Tạo mới sản phẩm thành công');
+      showToast({
+        type: 'success',
+        message: 'Tạo mới sản phẩm thành công',
+        duration: 3000,
+      });
       handleCloseAndResetModal();
       await loadProducts();
     } catch (error) {
@@ -49,10 +61,10 @@ const ModalCreateProduct = (props) => {
         error.message ||
         'Không thể kết nối đến server';
 
-      notification.error({
-        message: 'Tạo sản phẩm thất bại',
-        description: errorMessage,
-        duration: 5,
+      showToast({
+        type: 'error',
+        message: `Tạo mới thất bại: ${errorMessage}`,
+        duration: 5000,
       });
     } finally {
       setLoading(false);
@@ -102,14 +114,12 @@ const ModalCreateProduct = (props) => {
               quantity_in_stock: 0,
             }}
             onFinish={handleCreateProduct}
-            className="space-y-1"
+            className="space-y-3"
           >
             <Form.Item
               name="name"
               label={
-                <span className="font-medium text-gray-700">
-                  Tên sản phẩm *
-                </span>
+                <span className="font-medium text-gray-700">Tên sản phẩm</span>
               }
               rules={[
                 { required: true, message: 'Không được để trống tên sản phẩm' },
@@ -127,7 +137,7 @@ const ModalCreateProduct = (props) => {
             <Form.Item
               name="price"
               label={
-                <span className="font-medium text-gray-700">Giá (VNĐ) *</span>
+                <span className="font-medium text-gray-700">Giá (VNĐ)</span>
               }
               rules={[
                 { required: true, message: 'Không được để trống giá' },
@@ -156,21 +166,6 @@ const ModalCreateProduct = (props) => {
                   disabled={loading}
                   className="w-full h-10 rounded-lg"
                   placeholder="Nhập ID hãng"
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="category_id"
-                label={
-                  <span className="font-medium text-gray-700">ID Danh mục</span>
-                }
-                className="mb-4"
-              >
-                <InputNumber
-                  min={0}
-                  disabled={loading}
-                  className="w-full h-10 rounded-lg"
-                  placeholder="Nhập ID danh mục"
                 />
               </Form.Item>
             </div>
@@ -203,6 +198,12 @@ const ModalCreateProduct = (props) => {
                 placeholder="0"
               />
             </Form.Item>
+
+            <Divider orientation="left" className="mt-6 mb-4">
+              <span className="text-base font-semibold text-gray-700">
+                Thông số kỹ thuật
+              </span>
+            </Divider>
 
             <div className="grid grid-cols-2 gap-4">
               <Form.Item label="RAM" name="ram" className="mb-4">

@@ -26,7 +26,6 @@ class ProductService:
             new_product = Product(
                 name=product_data.name,
                 brand_id=product_data.brand_id,
-                category_id=product_data.category_id,
                 price=product_data.price,
                 description=product_data.description,
                 is_deleted=False
@@ -95,8 +94,8 @@ class ProductService:
         db: Session,
         skip: int = 0,
         limit: int = 10,
+        search: str | None = None,
         brand_id: int | None = None,
-        category_id: int | None = None,
         include_deleted: bool = False
     ) -> list[Product]:
         """Get all products with optional filters"""
@@ -105,10 +104,10 @@ class ProductService:
         filters = []
         if not include_deleted:
             filters.append(Product.is_deleted == False)
+        if search is not None and search.strip():
+            filters.append(Product.name.ilike(f"%{search.strip()}%"))
         if brand_id is not None:
             filters.append(Product.brand_id == brand_id)
-        if category_id is not None:
-            filters.append(Product.category_id == category_id)
 
         if filters:
             query = query.filter(and_(*filters))
@@ -118,8 +117,8 @@ class ProductService:
     @staticmethod
     def get_products_count(
         db: Session,
+        search: str | None = None,
         brand_id: int | None = None,
-        category_id: int | None = None,
         include_deleted: bool = False
     ) -> int:
         """Get total count of products with optional filters"""
@@ -128,10 +127,10 @@ class ProductService:
         filters = []
         if not include_deleted:
             filters.append(Product.is_deleted == False)
+        if search is not None and search.strip():
+            filters.append(Product.name.ilike(f"%{search.strip()}%"))
         if brand_id is not None:
             filters.append(Product.brand_id == brand_id)
-        if category_id is not None:
-            filters.append(Product.category_id == category_id)
 
         if filters:
             query = query.filter(and_(*filters))
@@ -179,7 +178,6 @@ class ProductService:
             # Update basic product fields
             product.name = product_data.name
             product.brand_id = product_data.brand_id
-            product.category_id = product_data.category_id
             product.price = product_data.price
             product.description = product_data.description
 
