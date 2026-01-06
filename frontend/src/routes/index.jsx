@@ -39,6 +39,123 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
+        path: '/',
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Home />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'products',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Products />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'products/:id',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <ProductDetail />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'about',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Introduce />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'contact',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Contact />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'cart',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Cart />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'checkout',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Checkout />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'profile',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Profile />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'profile/edit',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <ProfileEdit />
+              </Suspense>
+            ),
+          },
+          {
+            path: '/auth/callback',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <AuthCallback />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+      {
+        path: '/',
+        element: <AuthLayout />,
+        children: [
+          {
+            path: 'login',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Login />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'register',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Register />
+              </Suspense>
+            ),
+          },
+          {
+            path: '403',
+            element: (
+              <Suspense fallback={<LoadingFallback />}>
+                <Forbidden403 />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+      {
+        path: '/admin',
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <Home />

@@ -190,7 +190,7 @@ async def facebook_callback(
     
     redirect_response.set_cookie(
         key="current_user", 
-        value=result.user_principal.email, 
+        value=result.user_principal, 
         httponly=False, 
         secure=True, 
         samesite="none",

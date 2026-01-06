@@ -1,7 +1,6 @@
 import axiosClient from "./axiosClient";
 
 const userApi = {
-    // Get current user profile
     getProfile: () => {
         return axiosClient.get('/auth/me');
     },

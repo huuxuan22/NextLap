@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import ProductGallery from '../components/ProductGallery';
 import ProductSpecs from '../components/ProductSpecs';
 import RatingStars from '../components/RatingStars';
 import QuantitySelector from '../components/QuantitySelector';
 import { getProductById } from '../data/productsData';
 import { formatPrice } from '../utils/formatPrice';
+import { addToCart } from '../utils/cartUtils';
 
 /**
  * ProductDetail - Trang chi tiết sản phẩm laptop
  */
 const ProductDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [quantity, setQuantity] = useState(1);
 
     // Lấy thông tin sản phẩm từ database
@@ -29,11 +32,35 @@ const ProductDetail = () => {
     };
 
     const handleAddToCart = () => {
-        alert(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
+        const cartItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.images?.[0] || '/images/placeholder.jpg',
+            quantity: quantity
+        };
+
+        if (addToCart(cartItem)) {
+            toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
+        } else {
+            toast.error('Có lỗi khi thêm vào giỏ hàng');
+        }
     };
 
     const handleBuyNow = () => {
-        alert(`Đang chuyển đến trang thanh toán cho ${quantity} ${product.name}`);
+        const cartItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.images?.[0] || '/images/placeholder.jpg',
+            quantity: quantity
+        };
+
+        if (addToCart(cartItem)) {
+            navigate('/checkout');
+        } else {
+            toast.error('Có lỗi khi xử lý đơn hàng');
+        }
     };
 
     return (

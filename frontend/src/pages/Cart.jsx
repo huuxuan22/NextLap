@@ -3,6 +3,15 @@ import { FiShoppingCart, FiArrowLeft } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { CartEmpty, CartItem, CartSummary } from '../components/cart';
+import {
+    getCartFromStorage,
+    saveCartToStorage,
+    updateCartItemQuantity,
+    removeFromCart,
+    calculateSubtotal,
+    calculateShipping,
+    calculateTotal
+} from '../utils/cartUtils';
 
 const Cart = () => {
     const navigate = useNavigate();
@@ -10,38 +19,22 @@ const Cart = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        loadCartFromLocalStorage();
+        loadCart();
     }, []);
 
-    const loadCartFromLocalStorage = () => {
-        try {
-            const savedCart = localStorage.getItem('cart');
-            if (savedCart) {
-                setCartItems(JSON.parse(savedCart));
-            }
-        } catch (error) {
-            console.error('Error loading cart:', error);
-        }
-    };
-
-    const saveCartToLocalStorage = (items) => {
-        localStorage.setItem('cart', JSON.stringify(items));
+    const loadCart = () => {
+        setCartItems(getCartFromStorage());
     };
 
     const handleQuantityChange = (itemId, newQuantity) => {
         if (newQuantity < 1) return;
-
-        const updated = cartItems.map(item =>
-            item.id === itemId ? { ...item, quantity: newQuantity } : item
-        );
+        const updated = updateCartItemQuantity(itemId, newQuantity);
         setCartItems(updated);
-        saveCartToLocalStorage(updated);
     };
 
     const handleRemoveItem = (itemId) => {
-        const updated = cartItems.filter(item => item.id !== itemId);
+        const updated = removeFromCart(itemId);
         setCartItems(updated);
-        saveCartToLocalStorage(updated);
         toast.success('Xóa sản phẩm khỏi giỏ hàng');
     };
 
@@ -51,33 +44,12 @@ const Cart = () => {
             return;
         }
 
-        setLoading(true);
-        try {
-            // TODO: Integrate with order API
-            toast.success('Đặt hàng thành công!');
-            setCartItems([]);
-            saveCartToLocalStorage([]);
-            navigate('/');
-        } catch (error) {
-            toast.error('Lỗi khi đặt hàng!');
-        } finally {
-            setLoading(false);
-        }
+        navigate('/checkout');
     };
 
-    const calculateSubtotal = () => {
-        return cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    };
-
-    const calculateTotal = () => {
-        const subtotal = calculateSubtotal();
-        const shipping = subtotal > 500000 ? 0 : 30000;
-        return subtotal + shipping;
-    };
-
-    const subtotal = calculateSubtotal();
-    const shipping = subtotal > 500000 ? 0 : 30000;
-    const total = calculateTotal();
+    const subtotal = calculateSubtotal(cartItems);
+    const shipping = calculateShipping(subtotal);
+    const total = calculateTotal(cartItems);
 
     const formatPrice = (price) => {
         return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
