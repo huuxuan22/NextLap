@@ -15,6 +15,7 @@ const Products = lazy(() => import('../pages/Products'));
 const ProductDetail = lazy(() => import('../pages/ProductDetail'));
 const Contact = lazy(() => import('../pages/Contact'));
 const Cart = lazy(() => import('../pages/Cart'));
+const Checkout = lazy(() => import('../pages/Checkout'));
 const Dashboard = lazy(() => import('../pages/Dashboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 const Introduce = lazy(() => import('../pages/Introduce'));
@@ -80,6 +81,14 @@ export const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingFallback />}>
                         <Cart />
+                    </Suspense>
+                ),
+            },
+            {
+                path: 'checkout',
+                element: (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <Checkout />
                     </Suspense>
                 ),
             },
