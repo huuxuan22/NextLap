@@ -12,9 +12,6 @@ class Product(Base):
     brand_id: Mapped[int | None] = mapped_column(
         ForeignKey("brands.id"), nullable=True
     )
-    category_id: Mapped[int | None] = mapped_column(
-        ForeignKey("categories.id"), nullable=True
-    )
     price: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -25,9 +22,6 @@ class Product(Base):
 
     # Relationships
     brand: Mapped["Brand | None"] = relationship("Brand", back_populates="products")
-    category: Mapped["Category | None"] = relationship(
-        "Category", back_populates="products"
-    )
     spec: Mapped["ProductSpec | None"] = relationship(
         "ProductSpec", back_populates="product", uselist=False, cascade="all, delete-orphan"
     )

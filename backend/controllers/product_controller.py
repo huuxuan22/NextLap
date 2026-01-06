@@ -31,7 +31,6 @@ async def create_product(
     name: str = Form(..., min_length=1, max_length=150, description="Product name"),
     price: float = Form(..., gt=0, description="Product price"),
     brand_id: Optional[int] = Form(None, description="Brand ID"),
-    category_id: Optional[int] = Form(None, description="Category ID"),
     description: Optional[str] = Form(None, description="Product description"),
     quantity_in_stock: int = Form(0, ge=0, description="Quantity in stock"),
     ram: Optional[str] = Form(None, max_length=20, description="RAM specification"),
@@ -49,7 +48,6 @@ async def create_product(
     - **name**: Product name (required, max 150 characters)
     - **price**: Product price (required, must be > 0)
     - **brand_id**: Brand ID (optional)
-    - **category_id**: Category ID (optional)
     - **description**: Product description (optional)
     - **quantity_in_stock**: Quantity in stock (default: 0)
     - **ram**: RAM specification (optional)
@@ -96,7 +94,6 @@ async def create_product(
             name=name,
             price=price,
             brand_id=brand_id,
-            category_id=category_id,
             description=description,
             spec=spec
         )
@@ -124,7 +121,7 @@ async def create_product(
         if "foreign key" in str(e.orig).lower():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="ID brand hoặc category không tồn tại"
+                detail="ID brand không tồn tại"
             )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -196,8 +193,8 @@ async def get_product(
 async def get_products(
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(10, ge=1, le=100, description="Maximum items to return"),
+    search: str | None = Query(None, description="Search by product name"),
     brand_id: int | None = Query(None, description="Filter by brand ID"),
-    category_id: int | None = Query(None, description="Filter by category ID"),
     db: Session = Depends(get_db)
 ):
     """
@@ -206,8 +203,8 @@ async def get_products(
     Query parameters:
     - **skip**: Number of products to skip (default: 0)
     - **limit**: Maximum number of products to return (default: 10, max: 100)
+    - **search**: Search by product name (optional, case-insensitive)
     - **brand_id**: Filter by brand ID (optional)
-    - **category_id**: Filter by category ID (optional)
     
     Returns:
         - **200**: List of products
@@ -218,21 +215,33 @@ async def get_products(
             db,
             skip=skip,
             limit=limit,
-            brand_id=brand_id,
-            category_id=category_id
+            search=search,
+            brand_id=brand_id
         )
 
         total = ProductService.get_products_count(
             db,
-            brand_id=brand_id,
-            category_id=category_id
+            search=search,
+            brand_id=brand_id
         )
+
+        # Calculate pagination info
+        pagination = {
+            "skip": skip,
+            "limit": limit,
+            "total": total,
+            "current_page": (skip // limit) + 1,
+            "total_pages": (total + limit - 1) // limit,
+            "has_next": (skip + limit) < total,
+            "has_prev": skip > 0
+        }
 
         # Custom response with pagination info
         return DataResponse.custom_response(
             data=products,
             code="200",
-            message=f"Lấy danh sách sản phẩm thành công (tổng: {total})"
+            message=f"Lấy danh sách sản phẩm thành công (tổng: {total})",
+            pagination=pagination
         )
 
     except Exception as e:
@@ -254,7 +263,6 @@ async def update_product(
     name: str = Form(..., min_length=1, max_length=150, description="Product name"),
     price: float = Form(..., gt=0, description="Product price"),
     brand_id: Optional[int] = Form(None, description="Brand ID"),
-    category_id: Optional[int] = Form(None, description="Category ID"),
     description: Optional[str] = Form(None, description="Product description"),
     quantity_in_stock: int = Form(0, ge=0, description="Quantity in stock"),
     ram: Optional[str] = Form(None, max_length=20, description="RAM specification"),
@@ -273,7 +281,6 @@ async def update_product(
     - **name**: Product name (required, max 150 characters)
     - **price**: Product price (required, must be > 0)
     - **brand_id**: Brand ID (optional)
-    - **category_id**: Category ID (optional)
     - **description**: Product description (optional)
     - **quantity_in_stock**: Quantity in stock (default: 0)
     - **ram**: RAM specification (optional)
@@ -329,7 +336,6 @@ async def update_product(
             name=name,
             price=price,
             brand_id=brand_id,
-            category_id=category_id,
             description=description,
             spec=spec
         )

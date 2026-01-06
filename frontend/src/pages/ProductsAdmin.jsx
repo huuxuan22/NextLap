@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from "react";
-import { Button, Input, message } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import productApi from "../api/productApi";
-import TableProduct from "../components/product/TableProduct";
-import ModalCreateProduct from "../components/product/ModalCreateProduct";
-import ModalUpdateProduct from "../components/product/ModalUpdateProduct";
+import { useEffect, useState } from 'react';
+import { Button, Input, message } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import productApi from '../api/productApi';
+import TableProduct from '../components/product/TableProduct';
+import ModalCreateProduct from '../components/product/ModalCreateProduct';
+import ModalUpdateProduct from '../components/product/ModalUpdateProduct';
 
 const ProductsAdmin = () => {
   const [loading, setLoading] = useState(false);
@@ -16,7 +16,7 @@ const ProductsAdmin = () => {
   const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
   const [isModalUpdateOpen, setIsModalUpdateOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     loadProducts();
@@ -26,7 +26,12 @@ const ProductsAdmin = () => {
     try {
       setLoading(true);
       const skip = (currentPage - 1) * pageSize;
-      const res = await productApi.getAll(skip, pageSize);
+      const res = await productApi.getAll(
+        skip,
+        pageSize,
+        null,
+        searchText || null
+      );
 
       if (res.data) {
         setDataProducts(res.data);
@@ -35,7 +40,7 @@ const ProductsAdmin = () => {
         setTotal(totalProducts);
       }
     } catch (error) {
-      message.error("Lỗi khi tải dữ liệu sản phẩm");
+      message.error('Lỗi khi tải dữ liệu sản phẩm');
       console.error(error);
     } finally {
       setLoading(false);
@@ -90,8 +95,8 @@ const ProductsAdmin = () => {
             size="large"
             onSearch={handleSearch}
             onChange={(e) => {
-              if (e.target.value === "") {
-                handleSearch("");
+              if (e.target.value === '') {
+                handleSearch('');
               }
             }}
           />

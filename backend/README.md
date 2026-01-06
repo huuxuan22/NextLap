@@ -26,7 +26,6 @@ backend/
 │   └── cloudinary.py     # Cloudinary configuration
 ├── models/               # SQLAlchemy Models
 │   ├── brand.py
-│   ├── category.py
 │   ├── product.py
 │   ├── product_spec.py
 │   ├── user.py
@@ -57,11 +56,13 @@ python -m venv venv
 ### 2. Kích hoạt virtual environment
 
 **Windows:**
+
 ```bash
 venv\Scripts\activate
 ```
 
 **Linux/Mac:**
+
 ```bash
 source venv/bin/activate
 ```
@@ -112,9 +113,10 @@ MAIL_USE_SSL=False
 MAIL_FROM=your-email@gmail.com
 ```
 
-**Lưu ý:** 
+**Lưu ý:**
+
 - **Cloudinary:** Đăng ký tài khoản tại [cloudinary.com](https://cloudinary.com) và lấy thông tin từ Dashboard
-- **Email (Gmail):** 
+- **Email (Gmail):**
   - Sử dụng email Gmail của bạn
   - Cần tạo "Mật khẩu ứng dụng" (App Password) thay vì mật khẩu thông thường
   - Hướng dẫn: Vào Google Account → Security → 2-Step Verification → App passwords
@@ -154,6 +156,7 @@ uvicorn main:app --reload
 Server sẽ chạy tại: `http://127.0.0.1:8000`
 
 API Documentation:
+
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - ReDoc: `http://127.0.0.1:8000/redoc`
 

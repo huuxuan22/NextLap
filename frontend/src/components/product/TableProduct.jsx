@@ -2,6 +2,7 @@ import { App, Button, Popconfirm, Table, Tag, Space } from 'antd';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import productApi from '../../api/productApi';
+import { useToast } from '../Toast';
 
 const TableProduct = (props) => {
   const {
@@ -16,30 +17,36 @@ const TableProduct = (props) => {
     onEdit,
   } = props;
 
-  const { message, notification } = App.useApp();
+  const { showToast } = useToast();
 
   const handleDeleteProduct = async (id) => {
     try {
       await productApi.delete(id);
-      message.success('Xóa sản phẩm thành công');
+      showToast({
+        type: 'success',
+        message: 'Xóa sản phẩm thành công',
+        duration: 3000,
+      });
       await loadProducts();
     } catch (error) {
       console.log('Delete Product Error:', error);
-      notification.error({
-        message: 'Xóa sản phẩm thất bại',
-        description:
-          error.response?.data?.detail || 'Không thể kết nối đến server',
-        duration: 5,
+      showToast({
+        type: 'error',
+        message: `Xóa thất bại`,
+        duration: 5000,
       });
     }
   };
 
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
+      title: 'STT',
+      key: 'index',
       width: '8%',
+      align: 'center',
+      render: (_, record, index) => {
+        return index + 1 + (Number(currentPage) - 1) * Number(pageSize);
+      },
     },
     {
       title: 'Tên sản phẩm',
@@ -59,6 +66,7 @@ const TableProduct = (props) => {
           {price?.toLocaleString('vi-VN')} ₫
         </span>
       ),
+      sorter: (a, b) => Number(a.price) - Number(b.price),
     },
     {
       title: 'Tồn kho',
@@ -66,18 +74,14 @@ const TableProduct = (props) => {
       key: 'quantity_in_stock',
       width: '12%',
       render: (quantity) => <span>{quantity || 0}</span>,
+      sorter: (a, b) =>
+        Number(a.spec?.quantity_in_stock || 0) -
+        Number(b.spec?.quantity_in_stock || 0),
     },
     {
       title: 'Hãng',
       dataIndex: ['brand', 'name'],
       key: 'brand_id',
-      width: '15%',
-      render: (text) => <span className="text-gray-600">{text || 'N/A'}</span>,
-    },
-    {
-      title: 'Danh mục',
-      dataIndex: ['category', 'name'],
-      key: 'category_id',
       width: '15%',
       render: (text) => <span className="text-gray-600">{text || 'N/A'}</span>,
     },

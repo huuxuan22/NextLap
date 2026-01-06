@@ -31,7 +31,6 @@ if config.config_file_name is not None:
 from config.database import Base
 from models import (  # noqa: F401
     Brand,
-    Category,
     Product,
     ProductSpec,
     User,

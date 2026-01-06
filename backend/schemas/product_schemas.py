@@ -33,7 +33,6 @@ class ProductBase(BaseModel):
     """Base schema for Product"""
     name: str = Field(..., min_length=1, max_length=150)
     brand_id: Optional[int] = None
-    category_id: Optional[int] = None
     price: float = Field(..., gt=0)
     description: Optional[str] = None
 
