@@ -7,6 +7,7 @@ import PrivateRoute from './PrivateRoute';
 import Forbidden403 from '../pages/Forbidden403';
 import AuthCallback from '../hooks/useCallback';
 import ProductsAdmin from '../pages/ProductsAdmin';
+import BrandAdmin from '../pages/BrandAdmin';
 
 const Home = lazy(() => import('../pages/Home'));
 const Login = lazy(() => import('../pages/Login'));
@@ -169,6 +170,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <ProductsAdmin />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'brands',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <BrandAdmin />
           </Suspense>
         ),
       },
