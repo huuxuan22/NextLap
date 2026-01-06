@@ -12,6 +12,11 @@ const ProfileSecurity = () => {
     const [showConfirm, setShowConfirm] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const user = JSON.parse(localStorage.getItem("user_principal"));
+    console.log(user);
+    console.log("Xuân");
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -75,6 +80,7 @@ const ProfileSecurity = () => {
                         <input
                             value={oldPass}
                             onChange={(e) => setOldPass(e.target.value)}
+                            disabled={user.is_login === "FACEBOOK" || user.is_login === "GOOGLE"}
                             className="w-full pl-10 pr-10 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-green-500 focus:outline-none transition"
                             type={showOld ? "text" : "password"}
                             placeholder="Nhập mật khẩu hiện tại"
@@ -98,6 +104,7 @@ const ProfileSecurity = () => {
                         </div>
                         <input
                             value={newPass}
+                            disabled={user.is_login === "FACEBOOK" || user.is_login === "GOOGLE"}
                             onChange={(e) => setNewPass(e.target.value)}
                             className="w-full pl-10 pr-10 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-green-500 focus:outline-none transition"
                             type={showNew ? "text" : "password"}
@@ -122,6 +129,7 @@ const ProfileSecurity = () => {
                         </div>
                         <input
                             value={confirmPass}
+                            disabled={user.is_login === "FACEBOOK" || user.is_login === "GOOGLE"}
                             onChange={(e) => setConfirmPass(e.target.value)}
                             className="w-full pl-10 pr-10 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-green-500 focus:outline-none transition"
                             type={showConfirm ? "text" : "password"}

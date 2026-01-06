@@ -27,6 +27,12 @@ const authApi = {
             'facebook-login',
             `width=${width},height=${height},left=${left},top=${top},toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
         );
+    },
+    logout: () => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("user_principal");
+        localStorage.removeItem("refresh_token");
+        window.location.href = "/login";
     }
 };
 
