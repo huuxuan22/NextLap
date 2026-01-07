@@ -23,6 +23,7 @@ const NotFound = lazy(() => import('../pages/NotFound'));
 const Introduce = lazy(() => import('../pages/Introduce'));
 const Profile = lazy(() => import('../pages/Profile'));
 const ProfileEdit = lazy(() => import('../pages/ProfileEdit'));
+const PaymentResult = lazy(() => import('../pages/PaymentResult'));
 
 const LoadingFallback = () => (
   <div
@@ -91,6 +92,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <Checkout />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'payment-result',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <PaymentResult />
           </Suspense>
         ),
       },

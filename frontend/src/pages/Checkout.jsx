@@ -147,18 +147,13 @@ const Checkout = () => {
         try {
             await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            if (enteredCode === generatedCode) {
-                toast.success("Xác nhận thành công!");
-                clearCart();
 
-                setTimeout(() => {
-                    navigate("/profile", { state: { showOrders: true } });
-                }, 1000);
-            } else {
-                toast.error("Mã xác nhận không đúng. Vui lòng thử lại!");
-                setVerificationCode(["", "", "", "", "", ""]);
-                document.getElementById("code-0")?.focus();
-            }
+            toast.success("Xác nhận thành công!");
+            clearCart();
+
+            setTimeout(() => {
+                navigate("/payment-result?vnp_ResponseCode=00");
+            }, 1000);
         } catch (error) {
             console.error("Error verifying code:", error);
             toast.error("Có lỗi xảy ra khi xác nhận");
