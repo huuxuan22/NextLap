@@ -43,6 +43,11 @@ class Settings(BaseSettings):
 
     FACEBOOK_APP_ID: str = Field(..., alias="FACEBOOK_APP_ID")
     FACEBOOK_APP_SECRET: str = Field(..., alias="FACEBOOK_APP_SECRET")
+    VNP_TMNCODE: str = Field(..., alias="VNP_TMNCODE")
+    VNP_HASHSECRET: str = Field(..., alias="VNP_HASHSECRET")
+    VNP_URL: str = Field(..., alias="VNP_URL")
+    VNP_RETURN_URL: str = Field(..., alias="VNP_RETURN_URL")
+    VNP_IPN_URL: str = Field(..., alias="VNP_IPN_URL")
     
     @field_validator("API_PREFIX", mode="before")
     def normalize_api_prefix(cls, v):
