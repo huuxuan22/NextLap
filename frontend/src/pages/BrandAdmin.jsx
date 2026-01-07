@@ -69,7 +69,7 @@ const BrandAdmin = () => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 mb-3">
-            Danh sách nhãn hàng
+            Danh sách thương hiệu
           </h1>
           <Button
             onClick={() => {
@@ -79,7 +79,7 @@ const BrandAdmin = () => {
             size="large"
             className="rounded-lg"
           >
-            Tạo mới nhãn hàng
+            Tạo mới thương hiệu
           </Button>
         </div>
 
