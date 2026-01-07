@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from controllers.payment_controller import payment_router
 from controllers.user_controller import user_router
 from config.config import settings
 from config.database import engine, Base
@@ -96,7 +97,7 @@ app.include_router(user_router, prefix=settings.API_PREFIX)
 app.include_router(order_router, prefix=settings.API_PREFIX)
 app.include_router(cart_router, prefix=settings.API_PREFIX)
 app.include_router(dashboard_router, prefix=settings.API_PREFIX)
-
+app.include_router(payment_router, prefix=settings.API_PREFIX)
 # Register auth endpoints from controller
 
 @app.get("/")

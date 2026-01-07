@@ -59,7 +59,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/auth/google/login",
         "/auth/google/callback",
         "/auth/facebook/login",
-        "/auth/facebook/callback" 
+        "/auth/facebook/callback",
+        "/payment/vnpay/return",
+        "/payment/vnpay/ipn",
+        "/payment/vnpay/status"
     ]
 
     __prefix_paths = [

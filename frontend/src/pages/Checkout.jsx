@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FiShoppingBag, FiArrowLeft } from 'react-icons/fi';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { FiShoppingBag, FiArrowLeft } from "react-icons/fi";
+import { toast } from "react-toastify";
 import {
     ShippingForm,
     PaymentMethodSelector,
     OrderReview,
     VerificationCode,
     ProgressSteps,
-    OrderSummaryCard
-} from '../components/checkout';
-import { validateShippingInfo } from '../utils/validation';
+    OrderSummaryCard,
+} from "../components/checkout";
+import { validateShippingInfo } from "../utils/validation";
 import {
     getCartFromStorage,
     clearCart,
     calculateSubtotal,
     calculateShipping,
     calculateTotal,
-    formatPrice
-} from '../utils/cartUtils';
+    formatPrice,
+} from "../utils/cartUtils";
+import paymentApi from "../api/paymentApi";
 
 const Checkout = () => {
     const navigate = useNavigate();
@@ -28,22 +29,40 @@ const Checkout = () => {
 
     // Form states
     const [shippingInfo, setShippingInfo] = useState({
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        district: '',
-        ward: '',
-        note: ''
+        fullName: "",
+        email: "",
+        phone: "",
+        address: "",
+        city: "",
+        district: "",
+        ward: "",
+        note: "",
     });
 
-    const [paymentMethod, setPaymentMethod] = useState('cod');
+    const [paymentMethod, setPaymentMethod] = useState("cod");
 
     // Verification code state
-    const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
-    const [generatedCode, setGeneratedCode] = useState('');
+    const [verificationCode, setVerificationCode] = useState([
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+    ]);
+    const [generatedCode, setGeneratedCode] = useState("");
     const [isVerifying, setIsVerifying] = useState(false);
+
+    const handleNext = async () => {
+        if (paymentMethod === "vnpay") {
+            debugger;
+            const res = await paymentApi.createPayment(100000);
+            // Giả sử tổng đơn hàng là 100000 VND
+            window.location.href = res.payment_url; // Redirect sang VNPay
+        } else {
+            setCurrentStep(3); // Tiếp tục bước kế tiếp cho COD
+        }
+    };
 
     useEffect(() => {
         loadCart();
@@ -52,17 +71,17 @@ const Checkout = () => {
     const loadCart = () => {
         const items = getCartFromStorage();
         if (items.length === 0) {
-            toast.warning('Giỏ hàng trống!');
-            navigate('/cart');
+            toast.warning("Giỏ hàng trống!");
+            navigate("/cart");
         }
         setCartItems(items);
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setShippingInfo(prev => ({
+        setShippingInfo((prev) => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }));
     };
 
@@ -80,7 +99,7 @@ const Checkout = () => {
             setGeneratedCode(code);
 
             // Simulate sending verification code
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await new Promise((resolve) => setTimeout(resolve, 1500));
 
             toast.success(`Mã xác nhận đã được gửi đến ${shippingInfo.email}`);
             toast.info(`Mã của bạn là: ${code} (Demo)`);
@@ -88,8 +107,8 @@ const Checkout = () => {
             // Move to verification step
             setCurrentStep(4);
         } catch (error) {
-            console.error('Error sending verification code:', error);
-            toast.error('Có lỗi xảy ra khi gửi mã xác nhận');
+            console.error("Error sending verification code:", error);
+            toast.error("Có lỗi xảy ra khi gửi mã xác nhận");
         } finally {
             setLoading(false);
         }
@@ -110,39 +129,39 @@ const Checkout = () => {
     };
 
     const handleVerificationKeyDown = (index, e) => {
-        if (e.key === 'Backspace' && !verificationCode[index] && index > 0) {
+        if (e.key === "Backspace" && !verificationCode[index] && index > 0) {
             const prevInput = document.getElementById(`code-${index - 1}`);
             if (prevInput) prevInput.focus();
         }
     };
 
     const handleVerifyCode = async () => {
-        const enteredCode = verificationCode.join('');
+        const enteredCode = verificationCode.join("");
 
         if (enteredCode.length !== 6) {
-            toast.error('Vui lòng nhập đủ 6 số');
+            toast.error("Vui lòng nhập đủ 6 số");
             return;
         }
 
         setIsVerifying(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
 
             if (enteredCode === generatedCode) {
-                toast.success('Xác nhận thành công!');
+                toast.success("Xác nhận thành công!");
                 clearCart();
 
                 setTimeout(() => {
-                    navigate('/profile', { state: { showOrders: true } });
+                    navigate("/profile", { state: { showOrders: true } });
                 }, 1000);
             } else {
-                toast.error('Mã xác nhận không đúng. Vui lòng thử lại!');
-                setVerificationCode(['', '', '', '', '', '']);
-                document.getElementById('code-0')?.focus();
+                toast.error("Mã xác nhận không đúng. Vui lòng thử lại!");
+                setVerificationCode(["", "", "", "", "", ""]);
+                document.getElementById("code-0")?.focus();
             }
         } catch (error) {
-            console.error('Error verifying code:', error);
-            toast.error('Có lỗi xảy ra khi xác nhận');
+            console.error("Error verifying code:", error);
+            toast.error("Có lỗi xảy ra khi xác nhận");
         } finally {
             setIsVerifying(false);
         }
@@ -153,24 +172,24 @@ const Checkout = () => {
         try {
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             setGeneratedCode(code);
-            setVerificationCode(['', '', '', '', '', '']);
+            setVerificationCode(["", "", "", "", "", ""]);
 
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
 
-            toast.success('Đã gửi lại mã xác nhận!');
+            toast.success("Đã gửi lại mã xác nhận!");
             toast.info(`Mã mới của bạn là: ${code} (Demo)`);
         } catch (error) {
-            toast.error('Có lỗi khi gửi lại mã');
+            toast.error("Có lỗi khi gửi lại mã");
         } finally {
             setLoading(false);
         }
     };
 
     const steps = [
-        { id: 1, name: 'Thông tin giao hàng' },
-        { id: 2, name: 'Phương thức thanh toán' },
-        { id: 3, name: 'Xác nhận đơn hàng' },
-        { id: 4, name: 'Xác thực mã' }
+        { id: 1, name: "Thông tin giao hàng" },
+        { id: 2, name: "Phương thức thanh toán" },
+        { id: 3, name: "Xác nhận đơn hàng" },
+        { id: 4, name: "Xác thực mã" },
     ];
 
     const subtotal = calculateSubtotal(cartItems);
@@ -178,12 +197,12 @@ const Checkout = () => {
     const total = calculateTotal(cartItems);
 
     return (
-        <div className="min-h-screen py-8" style={{ backgroundColor: '#111827' }}>
+        <div className="min-h-screen py-8" style={{ backgroundColor: "#111827" }}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-8">
                     <button
-                        onClick={() => navigate('/cart')}
+                        onClick={() => navigate("/cart")}
                         className="flex items-center gap-2 text-gray-400 hover:text-white transition mb-4"
                     >
                         <FiArrowLeft /> Quay lại giỏ hàng
@@ -217,7 +236,7 @@ const Checkout = () => {
                                 paymentMethod={paymentMethod}
                                 onChange={handlePaymentChange}
                                 onBack={() => setCurrentStep(1)}
-                                onNext={() => setCurrentStep(3)}
+                                onNext={handleNext}
                             />
                         )}
 
@@ -247,7 +266,7 @@ const Checkout = () => {
                                 onResend={handleResendCode}
                                 onBack={() => {
                                     setCurrentStep(3);
-                                    setVerificationCode(['', '', '', '', '', '']);
+                                    setVerificationCode(["", "", "", "", "", ""]);
                                 }}
                                 isVerifying={isVerifying}
                                 loading={loading}

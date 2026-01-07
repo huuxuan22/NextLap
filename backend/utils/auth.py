@@ -17,7 +17,7 @@ def generate_token(data: dict[str, Any], exprices_delta: Optional[int] = None) -
         else:
             to_encode[key] = value
     exprice = datetime.now(timezone.utc) + timedelta(
-        minutes=exprices_delta if exprices_delta else settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES if exprices_delta else settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )
     to_encode.update({"exp": int(exprice.timestamp())})
     encode_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
