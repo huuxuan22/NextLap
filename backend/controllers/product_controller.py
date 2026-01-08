@@ -1,5 +1,5 @@
 """Product Controller - RESTful endpoints for product operations"""
-from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File, Form, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List, Optional
@@ -13,6 +13,7 @@ from schemas.product_schemas import (
 )
 from schemas.base_schema import DataResponse
 from services.product_service import ProductService
+from middleware.auth_midleware import authenticate_user, check_admin
 
 
 product_router = APIRouter(
@@ -25,9 +26,10 @@ product_router = APIRouter(
     response_model=DataResponse[ProductResponse],
     status_code=status.HTTP_201_CREATED,
     summary="Create a new product with file uploads",
-    description="Create a new product with form-data including image files"
+    description="Create a new product with form-data including image files - Admin only"
 )
 async def create_product(
+    request: Request,
     name: str = Form(..., min_length=1, max_length=150, description="Product name"),
     price: float = Form(..., gt=0, description="Product price"),
     brand_id: Optional[int] = Form(None, description="Brand ID"),
@@ -42,7 +44,7 @@ async def create_product(
     db: Session = Depends(get_db)
 ):
     """
-    Create a new product with file uploads via form-data.
+    Create a new product with file uploads via form-data - Admin only.
     
     Form parameters:
     - **name**: Product name (required, max 150 characters)
@@ -60,8 +62,13 @@ async def create_product(
     Returns:
         - **201**: Product created successfully with image URLs in spec.images
         - **400**: Bad request (invalid data or file upload error)
+        - **403**: Forbidden - Admin only
         - **500**: Internal server error
     """
+    # Check authentication and authorization
+    await authenticate_user(request)
+    await check_admin(request)
+    
     try:
         # Validate name is not empty
         if not name or not name.strip():
@@ -256,9 +263,10 @@ async def get_products(
     response_model=DataResponse[ProductResponse],
     status_code=status.HTTP_200_OK,
     summary="Update a product with file uploads",
-    description="Update product information with form-data including new image files"
+    description="Update product information with form-data including new image files - Admin only"
 )
 async def update_product(
+    request: Request,
     product_id: int,
     name: str = Form(..., min_length=1, max_length=150, description="Product name"),
     price: float = Form(..., gt=0, description="Product price"),
@@ -275,7 +283,7 @@ async def update_product(
     db: Session = Depends(get_db)
 ):
     """
-    Update a product with file uploads via form-data.
+    Update a product with file uploads via form-data - Admin only.
     
     Form parameters:
     - **name**: Product name (required, max 150 characters)
@@ -295,8 +303,13 @@ async def update_product(
         - **200**: Product updated successfully
         - **404**: Product not found
         - **400**: Bad request (invalid data)
+        - **403**: Forbidden - Admin only
         - **500**: Internal server error
     """
+    # Check authentication and authorization
+    await authenticate_user(request)
+    await check_admin(request)
+    
     try:
         # Check if product exists
         product = ProductService.get_product_by_id(db, product_id)
@@ -375,22 +388,28 @@ async def update_product(
     response_model=DataResponse,
     status_code=status.HTTP_200_OK,
     summary="Soft delete a product",
-    description="Mark a product as deleted (soft delete)"
+    description="Mark a product as deleted (soft delete) - Admin only"
 )
 async def delete_product(
+    request: Request,
     product_id: int,
     db: Session = Depends(get_db)
 ):
     """
-    Soft delete a product (mark as deleted, not permanently remove).
+    Soft delete a product (mark as deleted, not permanently remove) - Admin only.
     
     - **product_id**: Product ID (path parameter, required)
     
     Returns:
         - **200**: Product soft deleted successfully
         - **404**: Product not found
+        - **403**: Forbidden - Admin only
         - **500**: Internal server error
     """
+    # Check authentication and authorization
+    await authenticate_user(request)
+    await check_admin(request)
+    
     try:
         deleted = ProductService.soft_delete_product(db, product_id)
 
@@ -421,22 +440,28 @@ async def delete_product(
     response_model=DataResponse[ProductResponse],
     status_code=status.HTTP_200_OK,
     summary="Restore a soft deleted product",
-    description="Restore a product that was previously soft deleted"
+    description="Restore a product that was previously soft deleted - Admin only"
 )
 async def restore_product(
+    request: Request,
     product_id: int,
     db: Session = Depends(get_db)
 ):
     """
-    Restore a soft deleted product.
+    Restore a soft deleted product - Admin only.
     
     - **product_id**: Product ID (path parameter, required)
     
     Returns:
         - **200**: Product restored successfully
         - **404**: Product not found or not deleted
+        - **403**: Forbidden - Admin only
         - **500**: Internal server error
     """
+    # Check authentication and authorization
+    await authenticate_user(request)
+    await check_admin(request)
+    
     try:
         restored = ProductService.restore_product(db, product_id)
 

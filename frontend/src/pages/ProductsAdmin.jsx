@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Button, Input, message } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import productApi from '../api/productApi';
+import brandApi from '../api/brandApi';
 import TableProduct from '../components/product/TableProduct';
 import ModalCreateProduct from '../components/product/ModalCreateProduct';
 import ModalUpdateProduct from '../components/product/ModalUpdateProduct';
@@ -10,6 +11,7 @@ import ModalUpdateProduct from '../components/product/ModalUpdateProduct';
 const ProductsAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [dataProducts, setDataProducts] = useState([]);
+  const [brands, setBrands] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -20,6 +22,7 @@ const ProductsAdmin = () => {
 
   useEffect(() => {
     loadProducts();
+    loadBrands();
   }, [currentPage, pageSize, searchText]);
 
   const loadProducts = async () => {
@@ -44,6 +47,17 @@ const ProductsAdmin = () => {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBrands = async () => {
+    try {
+      const res = await brandApi.getAll({ page: 1, limit: 1000 });
+      if (res.data) {
+        setBrands(res.data);
+      }
+    } catch (error) {
+      console.error('Error loading brands:', error);
     }
   };
 
@@ -113,12 +127,14 @@ const ProductsAdmin = () => {
         setPageSize={setPageSize}
         total={total}
         onEdit={handleEdit}
+        brands={brands}
       />
 
       <ModalCreateProduct
         loadProducts={loadProducts}
         isModalCreateOpen={isModalCreateOpen}
         setIsModalCreateOpen={setIsModalCreateOpen}
+        brands={brands}
       />
 
       {selectedProduct && (
@@ -127,6 +143,7 @@ const ProductsAdmin = () => {
           isModalOpen={isModalUpdateOpen}
           onCancel={handleUpdateCancel}
           onSuccess={handleUpdateSuccess}
+          brands={brands}
         />
       )}
     </>

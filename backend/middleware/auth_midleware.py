@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, Depends
 from starlette.middleware.base import BaseHTTPMiddleware  
 from starlette.responses import JSONResponse
 from fastapi import HTTPException, status
@@ -7,6 +7,8 @@ from config.config import settings
 from config.database import SessionLocal
 from models.user import User
 from config.context import current_user
+from functools import wraps
+from sqlalchemy.orm import joinedload
 
 async def authenticate_user(request: Request):
     auth_header = request.headers.get("Authorization")
@@ -27,10 +29,10 @@ async def authenticate_user(request: Request):
         user = None
         # Ưu tiên tìm bằng email (Google/NORMAL login)
         if email:
-            user = db.query(User).filter(User.email == email).first()
+            user = db.query(User).options(joinedload(User.role)).filter(User.email == email).first()
         
         if not user and user_id:
-            user = db.query(User).filter(User.id == int(user_id)).first()
+            user = db.query(User).options(joinedload(User.role)).filter(User.id == int(user_id)).first()
         
         if not user:
             raise HTTPException(status_code=401, detail="Không tìm thấy người dùng")
@@ -41,6 +43,28 @@ async def authenticate_user(request: Request):
         request.state.user = user
     finally:
         db.close()
+
+
+async def check_admin(request: Request):
+    """
+    Kiểm tra xem user hiện tại có quyền admin không.
+    Dùng khi user đã được authenticate trước đó.
+    """
+    user = getattr(request.state, 'user', None)
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="Không tìm thấy thông tin người dùng"
+        )
+    
+    # Kiểm tra role, mặc định admin role có id = 1 hoặc name = "admin"
+    if not user.role or (user.role.name != "admin" and user.role.id != 1):
+        raise HTTPException(
+            status_code=403,
+            detail="Bạn không có quyền truy cập tài nguyên này"
+        )
+    
+    return user
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -139,3 +163,40 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 status_code=e.status_code,
                 content={"success": False, "message": e.detail}
             )
+
+
+def require_admin(func):
+    """
+    Decorator để bảo vệ các endpoint chỉ dành cho admin.
+    Sử dụng kết hợp với authenticate_user hoặc AuthMiddleware.
+    
+    Cách dùng:
+        @order_router.post("")
+        @require_admin
+        async def create_order(request: Request, db: Session = Depends(get_db)):
+            ...
+    """
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        # Tìm request object từ args hoặc kwargs
+        request = None
+        for arg in args:
+            if isinstance(arg, Request):
+                request = arg
+                break
+        
+        if not request and 'request' in kwargs:
+            request = kwargs['request']
+        
+        if not request:
+            raise HTTPException(
+                status_code=500,
+                detail="Không thể xác định request"
+            )
+        
+        # Gọi check_admin để kiểm tra quyền
+        user = await check_admin(request)
+        
+        return await func(*args, **kwargs)
+    
+    return wrapper
