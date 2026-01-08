@@ -3,59 +3,47 @@ import React from 'react';
 const ProductFilter = ({
     searchTerm,
     setSearchTerm,
-    selectedCategory,
-    setSelectedCategory,
+    brands = [],
+    selectedBrand,
+    setSelectedBrand,
     priceRange,
     setPriceRange,
-    selectedCpu,
-    setSelectedCpu,
+    selectedChip,
+    setSelectedChip,
     selectedRam,
     setSelectedRam,
-    selectedGpu,
-    setSelectedGpu,
-    resultsCount
+    resultsCount,
+    onReset
 }) => {
-    const categories = [
-        { value: 'all', label: 'Tất cả' },
-        { value: 'Dell', label: 'Dell' },
-        { value: 'HP', label: 'HP' },
-        { value: 'Lenovo', label: 'Lenovo' },
-        { value: 'Asus', label: 'Asus' },
-        { value: 'Apple', label: 'Apple' },
-        { value: 'MSI', label: 'MSI' },
-    ];
-
     const priceRanges = [
         { value: 'all', label: 'Tất cả giá' },
-        { value: '0-30', label: '<30tr' },
-        { value: '30-40', label: '30-40tr' },
-        { value: '40-50', label: '40-50tr' },
-        { value: '50+', label: '>50tr' },
+        { value: '0-10', label: 'Dưới 10 triệu' },
+        { value: '10-20', label: '10 - 20 triệu' },
+        { value: '20-30', label: '20 - 30 triệu' },
+        { value: '30+', label: 'Trên 30 triệu' },
     ];
 
-    const cpuOptions = [
+    const chipOptions = [
         { value: 'all', label: 'Tất cả' },
-        { value: 'Intel Core i5', label: 'i5' },
-        { value: 'Intel Core i7', label: 'i7' },
-        { value: 'AMD Ryzen 7', label: 'Ryzen 7' },
-        { value: 'Apple M3 Pro', label: 'M3 Pro' },
+        { value: 'Apple', label: 'Apple' },
+        { value: 'Snapdragon', label: 'Snapdragon' },
+        { value: 'Exynos', label: 'Exynos' },
+        { value: 'MediaTek', label: 'MediaTek' },
+        { value: 'Intel', label: 'Intel' },
+        { value: 'AMD', label: 'AMD' },
     ];
 
     const ramOptions = [
         { value: 'all', label: 'Tất cả' },
+        { value: '4GB', label: '4GB' },
+        { value: '6GB', label: '6GB' },
         { value: '8GB', label: '8GB' },
+        { value: '12GB', label: '12GB' },
         { value: '16GB', label: '16GB' },
-        { value: '18GB', label: '18GB' },
         { value: '32GB+', label: '32GB+' },
     ];
 
-    const gpuOptions = [
-        { value: 'all', label: 'Tất cả' },
-        { value: 'Integrated', label: 'Tích hợp' },
-        { value: 'NVIDIA GTX 1650', label: 'GTX 1650' },
-        { value: 'NVIDIA RTX 3060', label: 'RTX 3060' },
-        { value: 'Apple M3 Pro GPU', label: 'M3 Pro' },
-    ];
+    const hasActiveFilters = searchTerm || selectedBrand !== 'all' || priceRange !== 'all' || selectedChip !== 'all' || selectedRam !== 'all';
 
     return (
         <div
@@ -79,10 +67,20 @@ const ProductFilter = ({
                             className="bg-transparent outline-none w-48"
                             style={{ color: '#F9FAFB' }}
                         />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 
-                {/* Category with icon */}
+                {/* Brand filter - Dynamic from API */}
                 <div className="flex flex-col gap-1">
                     <label className="text-xs font-medium px-1" style={{ color: '#9CA3AF' }}>Thương hiệu</label>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#111827', border: '1px solid #374151' }}>
@@ -90,13 +88,16 @@ const ProductFilter = ({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                         </svg>
                         <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            value={selectedBrand}
+                            onChange={(e) => setSelectedBrand(e.target.value)}
                             className="bg-transparent outline-none cursor-pointer"
                             style={{ color: '#F9FAFB' }}
                         >
-                            {categories.map(cat => (
-                                <option key={cat.value} value={cat.value} style={{ backgroundColor: '#111827' }}>{cat.label}</option>
+                            <option value="all" style={{ backgroundColor: '#111827' }}>Tất cả</option>
+                            {brands.map(brand => (
+                                <option key={brand.id} value={brand.id} style={{ backgroundColor: '#111827' }}>
+                                    {brand.name}
+                                </option>
                             ))}
                         </select>
                     </div>
@@ -122,20 +123,20 @@ const ProductFilter = ({
                     </div>
                 </div>
 
-                {/* CPU with icon */}
+                {/* Chip/CPU with icon */}
                 <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium px-1" style={{ color: '#9CA3AF' }}>CPU</label>
+                    <label className="text-xs font-medium px-1" style={{ color: '#9CA3AF' }}>Chip</label>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#111827', border: '1px solid #374151' }}>
                         <svg className="w-4 h-4" style={{ color: '#9CA3AF' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
                         </svg>
                         <select
-                            value={selectedCpu}
-                            onChange={(e) => setSelectedCpu(e.target.value)}
+                            value={selectedChip}
+                            onChange={(e) => setSelectedChip(e.target.value)}
                             className="bg-transparent outline-none cursor-pointer"
                             style={{ color: '#F9FAFB' }}
                         >
-                            {cpuOptions.map(option => (
+                            {chipOptions.map(option => (
                                 <option key={option.value} value={option.value} style={{ backgroundColor: '#111827' }}>{option.label}</option>
                             ))}
                         </select>
@@ -162,29 +163,26 @@ const ProductFilter = ({
                     </div>
                 </div>
 
-                {/* GPU with icon */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-medium px-1" style={{ color: '#9CA3AF' }}>GPU</label>
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#111827', border: '1px solid #374151' }}>
-                        <svg className="w-4 h-4" style={{ color: '#9CA3AF' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                        </svg>
-                        <select
-                            value={selectedGpu}
-                            onChange={(e) => setSelectedGpu(e.target.value)}
-                            className="bg-transparent outline-none cursor-pointer"
-                            style={{ color: '#F9FAFB' }}
+                {/* Reset button */}
+                {hasActiveFilters && (
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-medium px-1" style={{ color: 'transparent' }}>Reset</label>
+                        <button
+                            onClick={onReset}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all hover:bg-red-600"
+                            style={{ backgroundColor: '#EF4444', color: '#FFFFFF' }}
                         >
-                            {gpuOptions.map(option => (
-                                <option key={option.value} value={option.value} style={{ backgroundColor: '#111827' }}>{option.label}</option>
-                            ))}
-                        </select>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Xóa bộ lọc</span>
+                        </button>
                     </div>
-                </div>
+                )}
 
                 {/* Results count */}
                 <div className="ml-auto text-sm" style={{ color: '#9CA3AF' }}>
-                    {resultsCount} sản phẩm
+                    <span className="font-semibold" style={{ color: '#22C55E' }}>{resultsCount}</span> sản phẩm
                 </div>
             </div>
         </div>

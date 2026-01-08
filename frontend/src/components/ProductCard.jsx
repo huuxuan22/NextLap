@@ -14,6 +14,28 @@ const ProductCard = ({ product }) => {
         }).format(price);
     };
 
+    // Get first image from spec.images or use placeholder
+    const getProductImage = () => {
+        if (product.spec && product.spec.images && product.spec.images.length > 0) {
+            return product.spec.images[0];
+        }
+        return null;
+    };
+
+    // Generate specs text from product data
+    const getSpecsText = () => {
+        if (product.spec) {
+            const parts = [];
+            if (product.spec.chip) parts.push(product.spec.chip);
+            if (product.spec.ram) parts.push(product.spec.ram);
+            if (product.spec.screen) parts.push(product.spec.screen);
+            return parts.join(', ') || 'Xem chi tiết';
+        }
+        return product.specs || 'Xem chi tiết';
+    };
+
+    const imageUrl = getProductImage();
+
     return (
         <Link
             to={`/products/${product.id}`}
@@ -25,37 +47,51 @@ const ProductCard = ({ product }) => {
         >
             {/* Product Image */}
             <div
-                className="w-full h-48 bg-gray-700 flex items-center justify-center"
+                className="w-full h-48 bg-gray-700 flex items-center justify-center overflow-hidden"
                 style={{ backgroundColor: '#374151' }}
             >
-                <div style={{ color: '#9CA3AF', fontSize: '14px' }}>
-                    {product.name}
-                </div>
+                {imageUrl ? (
+                    <img
+                        src={imageUrl}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = `<div style="color: #9CA3AF; fontSize: 14px">${product.name}</div>`;
+                        }}
+                    />
+                ) : (
+                    <div style={{ color: '#9CA3AF', fontSize: '14px' }}>
+                        {product.name}
+                    </div>
+                )}
             </div>
 
             {/* Product Info */}
             <div className="p-5">
                 <h2
-                    className="text-xl font-semibold mb-2"
+                    className="text-xl font-semibold mb-2 line-clamp-2"
                     style={{ color: '#F9FAFB' }}
                 >
                     {product.name}
                 </h2>
 
                 <p
-                    className="text-sm mb-3"
+                    className="text-sm mb-3 line-clamp-1"
                     style={{ color: '#9CA3AF' }}
                 >
-                    {product.specs}
+                    {getSpecsText()}
                 </p>
 
                 {/* Rating */}
-                <div className="flex items-center mb-3">
-                    <RatingStars rating={product.rating} size="sm" />
-                    <span className="ml-2 text-sm" style={{ color: '#9CA3AF' }}>
-                        ({product.rating})
-                    </span>
-                </div>
+                {product.rating && (
+                    <div className="flex items-center mb-3">
+                        <RatingStars rating={product.rating} size="sm" />
+                        <span className="ml-2 text-sm" style={{ color: '#9CA3AF' }}>
+                            ({product.rating})
+                        </span>
+                    </div>
+                )}
 
                 {/* Price and Actions */}
                 <div className="flex items-center justify-between">

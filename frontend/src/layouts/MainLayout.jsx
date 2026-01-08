@@ -5,9 +5,6 @@ import Footer from "../components/Footer";
 import authApi from "../api/authApi";
 
 const MainLayout = () => {
-  // State cho dropdown sản phẩm
-  const [productsDropdown, setProductsDropdown] = useState(false);
-
   // State cho search input
   const [showSearch, setShowSearch] = useState(false);
 
@@ -15,19 +12,12 @@ const MainLayout = () => {
   const [userDropdown, setUserDropdown] = useState(false);
 
   // Refs để xử lý click ra ngoài
-  const productsDropdownRef = useRef(null);
   const searchRef = useRef(null);
   const userDropdownRef = useRef(null);
 
-  // Xử lý click ra ngoài dropdown sản phẩm
+  // Xử lý click ra ngoài
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        productsDropdownRef.current &&
-        !productsDropdownRef.current.contains(event.target)
-      ) {
-        setProductsDropdown(false);
-      }
       if (
         searchRef.current &&
         !searchRef.current.contains(event.target) &&
@@ -159,74 +149,13 @@ const MainLayout = () => {
                 Trang chủ
               </Link>
 
-              {/* Sản phẩm với dropdown */}
-              <div
-                className="relative"
-                ref={productsDropdownRef}
-                onMouseEnter={() => setProductsDropdown(true)}
-                onMouseLeave={() => setProductsDropdown(true)}
+              {/* Sản phẩm */}
+              <Link
+                to="/products"
+                className="text-text-light transition-colors hover:no-underline hover:bg-bg-dark hover:text-highlight-hover px-3 py-2 rounded"
               >
-                <button
-                  className="text-text-light transition-colors hover:no-underline hover:bg-bg-dark hover:text-highlight-hover px-3 py-2 rounded flex items-center gap-1"
-                >
-                  Sản phẩm
-                  <svg
-                    className={`w-4 h-4 transition-transform ${productsDropdown ? "rotate-180" : ""
-                      }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {/* Dropdown sản phẩm */}
-                {productsDropdown && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-card-dark rounded-lg shadow-lg py-2 z-10 des ">
-                    <Link
-                      to="/products/laptop"
-                      className="block px-4 py-2 text-text-light hover:bg-bg-dark hover:text-highlight-hover transition-colors hover:font-bold "
-                      onClick={() => setProductsDropdown(false)}
-                    >
-                      Laptop
-                    </Link>
-                    <Link
-                      to="/products/phone"
-                      className="block px-4 py-2 text-text-light hover:bg-bg-dark hover:text-highlight-hover transition-colors hover:font-bold"
-                      onClick={() => setProductsDropdown(false)}
-                    >
-                      Phone
-                    </Link>
-                    <Link
-                      to="/products/headphone"
-                      className="block px-4 py-2 text-text-light hover:bg-bg-dark hover:text-highlight-hover transition-colors hover:font-bold"
-                      onClick={() => setProductsDropdown(false)}
-                    >
-                      Headphone
-                    </Link>
-                    <Link
-                      to="/products/tablet"
-                      className="block px-4 py-2 text-text-light hover:bg-bg-dark hover:text-highlight-hover transition-colors hover:font-bold"
-                      onClick={() => setProductsDropdown(false)}
-                    >
-                      Tablet
-                    </Link>
-                    <Link
-                      to="/products/accessories"
-                      className="block px-4 py-2 text-text-light hover:bg-bg-dark hover:text-highlight-hover transition-colors hover:font-bold"
-                      onClick={() => setProductsDropdown(false)}
-                    >
-                      Phụ kiện
-                    </Link>
-                  </div>
-                )}
-              </div>
+                Sản phẩm
+              </Link>
 
               {/* Liên hệ */}
               <Link
