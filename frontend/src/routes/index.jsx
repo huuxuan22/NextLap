@@ -9,6 +9,7 @@ import AuthCallback from '../hooks/useCallback';
 import ProductsAdmin from '../pages/ProductsAdmin';
 import BrandAdmin from '../pages/BrandAdmin';
 import UserAdmin from '../pages/UserAdmin';
+import OrderAdmin from '../pages/OrderAdmin';
 
 const Home = lazy(() => import('../pages/Home'));
 const Login = lazy(() => import('../pages/Login'));
@@ -196,6 +197,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <UserAdmin />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'orders',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <OrderAdmin />
           </Suspense>
         ),
       },
