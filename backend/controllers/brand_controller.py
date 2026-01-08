@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from schemas.brand_schema import BrandSchema, BrandCreateSchema, BrandUpdateSchema
 from schemas.base_schema import DataResponse
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from config.database import get_db
 from services.brand_service import BrandService
+from middleware.auth_midleware import authenticate_user, check_admin
 from fastapi import Query
 from math import ceil
 
@@ -47,7 +48,15 @@ async def get_brand_by_id(id: int, db: Session = Depends(get_db)):
     )
     
 @brand_router.post("",response_model=DataResponse[BrandSchema])
-async def create_brand(data : BrandCreateSchema, db: Session = Depends(get_db)):
+async def create_brand(
+    request: Request,
+    data: BrandCreateSchema,
+    db: Session = Depends(get_db)
+):
+    """Create brand - Admin only"""
+    await authenticate_user(request)
+    await check_admin(request)
+    
     new_brand = BrandService.create_brand(data, db)
     
     return DataResponse.custom_response(
@@ -57,7 +66,16 @@ async def create_brand(data : BrandCreateSchema, db: Session = Depends(get_db)):
     )
     
 @brand_router.put("/{id}",response_model=DataResponse[BrandSchema])
-async def update_brand(id: int, data : BrandUpdateSchema, db: Session = Depends(get_db)):
+async def update_brand(
+    request: Request,
+    id: int,
+    data: BrandUpdateSchema,
+    db: Session = Depends(get_db)
+):
+    """Update brand - Admin only"""
+    await authenticate_user(request)
+    await check_admin(request)
+    
     updated_brand = BrandService.update_brand(id, data, db)
     
     return DataResponse.custom_response(
@@ -67,7 +85,15 @@ async def update_brand(id: int, data : BrandUpdateSchema, db: Session = Depends(
     )
     
 @brand_router.delete("/{id}",response_model=DataResponse[Optional[bool]])
-async def delete_brand(id: int, db: Session = Depends(get_db)):
+async def delete_brand(
+    request: Request,
+    id: int,
+    db: Session = Depends(get_db)
+):
+    """Delete brand - Admin only"""
+    await authenticate_user(request)
+    await check_admin(request)
+    
     result = BrandService.delete_brand(id, db)
     
     return DataResponse.custom_response(

@@ -15,9 +15,16 @@ const TableProduct = (props) => {
     setPageSize,
     total,
     onEdit,
+    brands,
   } = props;
 
   const { showToast } = useToast();
+
+  const getBrandName = (brandId) => {
+    if (!brandId) return 'N/A';
+    const brand = brands?.find((b) => b.id === brandId);
+    return brand?.name || 'N/A';
+  };
 
   const handleDeleteProduct = async (id) => {
     try {
@@ -80,10 +87,12 @@ const TableProduct = (props) => {
     },
     {
       title: 'Hãng',
-      dataIndex: ['brand', 'name'],
+      dataIndex: 'brand_id',
       key: 'brand_id',
       width: '15%',
-      render: (text) => <span className="text-gray-600">{text || 'N/A'}</span>,
+      render: (brandId) => (
+        <span className="text-gray-600">{getBrandName(brandId)}</span>
+      ),
     },
     {
       title: 'Hành động',

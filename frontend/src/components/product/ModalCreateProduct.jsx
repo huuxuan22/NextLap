@@ -7,6 +7,7 @@ import {
   Upload,
   InputNumber,
   Divider,
+  Select,
 } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { useState } from 'react';
@@ -14,7 +15,8 @@ import productApi from '../../api/productApi';
 import { useToast } from '../../components/Toast';
 
 const ModalCreateProduct = (props) => {
-  const { loadProducts, isModalCreateOpen, setIsModalCreateOpen } = props;
+  const { loadProducts, isModalCreateOpen, setIsModalCreateOpen, brands } =
+    props;
   const [form] = Form.useForm();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -156,16 +158,17 @@ const ModalCreateProduct = (props) => {
             <div className="grid grid-cols-2 gap-4">
               <Form.Item
                 name="brand_id"
-                label={
-                  <span className="font-medium text-gray-700">ID Hãng</span>
-                }
+                label={<span className="font-medium text-gray-700">Hãng</span>}
                 className="mb-4"
               >
-                <InputNumber
-                  min={0}
+                <Select
+                  placeholder="Chọn hãng"
                   disabled={loading}
-                  className="w-full h-10 rounded-lg"
-                  placeholder="Nhập ID hãng"
+                  allowClear
+                  options={brands.map((brand) => ({
+                    label: brand.name,
+                    value: brand.id,
+                  }))}
                 />
               </Form.Item>
             </div>
