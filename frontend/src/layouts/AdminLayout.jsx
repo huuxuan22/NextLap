@@ -24,6 +24,7 @@ const AdminLayout = () => {
     { path: '/admin/brands', label: 'Thương hiệu' },
     { path: '/admin/products', label: 'Sản phẩm' },
     { path: '/admin/users', label: 'Người dùng' },
+    { path: '/admin/orders', label: 'Đơn hàng' },
   ];
 
   return (
