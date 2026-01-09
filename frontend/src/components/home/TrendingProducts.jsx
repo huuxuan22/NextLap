@@ -9,8 +9,8 @@ const trendingProducts = [
         originalPrice: 32990000,
         discount: 15,
         soldCount: 234,
-        image: '💻',
-        tag: 'Best Seller'
+        tag: 'Best Seller',
+        rating: 4.9
     },
     {
         id: 2,
@@ -19,8 +19,8 @@ const trendingProducts = [
         originalPrice: 18990000,
         discount: 16,
         soldCount: 189,
-        image: '🖥️',
-        tag: 'Hot Deal'
+        tag: 'Hot Deal',
+        rating: 4.7
     },
     {
         id: 3,
@@ -29,8 +29,8 @@ const trendingProducts = [
         originalPrice: 25990000,
         discount: 12,
         soldCount: 156,
-        image: '🎮',
-        tag: 'Gaming'
+        tag: 'Gaming',
+        rating: 4.8
     },
     {
         id: 4,
@@ -39,8 +39,8 @@ const trendingProducts = [
         originalPrice: 21990000,
         discount: 14,
         soldCount: 142,
-        image: '💼',
-        tag: 'Văn phòng'
+        tag: 'Văn phòng',
+        rating: 4.6
     },
     {
         id: 5,
@@ -49,8 +49,8 @@ const trendingProducts = [
         originalPrice: 28990000,
         discount: 14,
         soldCount: 128,
-        image: '🔥',
-        tag: 'Hot'
+        tag: 'Hot',
+        rating: 4.8
     }
 ];
 
@@ -58,102 +58,215 @@ const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
 };
 
+const RatingStars = ({ rating }) => {
+    return (
+        <div className="flex items-center gap-0.5">
+            {[...Array(5)].map((_, i) => (
+                <span
+                    key={i}
+                    className={`text-xs ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-600'}`}
+                >
+                    ★
+                </span>
+            ))}
+            <span className="text-xs text-gray-500 ml-1">({rating})</span>
+        </div>
+    );
+};
+
 const TrendingCard = ({ product, rank }) => {
     return (
         <Link
             to={`/products/${product.id}`}
-            className="flex items-center gap-4 p-4 rounded-xl transition-all hover:scale-[1.02]"
-            style={{ backgroundColor: '#1F2937' }}
+            className="flex items-center gap-4 p-4 border border-gray-800 hover:border-gray-700 transition-all duration-300 hover:translate-y-[-2px] group"
+            style={{
+                backgroundColor: '#1F2937',
+                borderRadius: '4px',
+                position: 'relative',
+                overflow: 'hidden'
+            }}
         >
+            {/* Highlight border effect */}
+            <div className="absolute inset-0 border border-transparent group-hover:border-gray-600 transition-colors duration-300 pointer-events-none"></div>
+
             {/* Rank */}
             <div
-                className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+                className="flex-shrink-0 w-9 h-9 flex items-center justify-center font-bold text-sm"
                 style={{
                     backgroundColor: rank <= 3 ? '#22C55E' : '#374151',
-                    color: '#F9FAFB'
+                    color: '#F9FAFB',
+                    borderRadius: '2px',
+                    position: 'relative'
                 }}
             >
                 {rank}
+                {rank <= 3 && (
+                    <div className="absolute -top-1 -right-1 w-2 h-2">
+                        <div className="absolute inset-0 bg-green-400 animate-ping rounded-full opacity-75"></div>
+                        <div className="absolute inset-0 bg-green-500 rounded-full"></div>
+                    </div>
+                )}
             </div>
 
-            {/* Image */}
+            {/* Product Image Placeholder */}
             <div
-                className="w-16 h-16 rounded-lg flex items-center justify-center text-3xl"
-                style={{ backgroundColor: '#374151' }}
+                className="flex-shrink-0 w-14 h-14 flex items-center justify-center"
+                style={{
+                    backgroundColor: '#374151',
+                    borderRadius: '4px',
+                    border: '1px solid #4B5563'
+                }}
             >
-                {product.image}
+                <div className="text-sm font-medium text-gray-400">
+                    {product.name.split(' ')[0].substring(0, 3)}
+                </div>
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold truncate" style={{ color: '#F9FAFB' }}>
-                        {product.name}
-                    </h4>
-                    <span
-                        className="px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap"
-                        style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' }}
-                    >
-                        -{product.discount}%
-                    </span>
+                <div className="flex items-start justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                        <h4
+                            className="font-medium truncate group-hover:text-green-400 transition-colors"
+                            style={{ color: '#F9FAFB' }}
+                        >
+                            {product.name}
+                        </h4>
+                        <span
+                            className="px-2 py-0.5 text-xs font-medium whitespace-nowrap"
+                            style={{
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                color: '#22C55E',
+                                borderRadius: '2px'
+                            }}
+                        >
+                            -{product.discount}%
+                        </span>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-2">
-                    <span className="font-bold" style={{ color: '#22C55E' }}>
+                {/* Rating */}
+                <div className="mb-2">
+                    <RatingStars rating={product.rating} />
+                </div>
+
+                {/* Pricing */}
+                <div className="flex items-center gap-3 mb-1">
+                    <span
+                        className="font-bold text-lg"
+                        style={{ color: '#22C55E' }}
+                    >
                         {formatPrice(product.price)}
                     </span>
-                    <span className="text-sm line-through" style={{ color: '#6B7280' }}>
-                        {formatPrice(product.originalPrice)}
+                    <span
+                        className="text-sm"
+                        style={{ color: '#6B7280' }}
+                    >
+                        <span className="line-through">{formatPrice(product.originalPrice)}</span>
                     </span>
                 </div>
 
-                <div className="flex items-center gap-1 mt-1">
-                    <span className="text-xs" style={{ color: '#9CA3AF' }}>
-                        🔥 Đã bán {product.soldCount}
+                {/* Stats */}
+                <div className="flex items-center gap-3 text-xs">
+                    <span style={{ color: '#9CA3AF' }}>
+                        Đã bán {product.soldCount}
+                    </span>
+                    <span style={{ color: '#9CA3AF' }}>•</span>
+                    <span style={{ color: '#9CA3AF' }}>
+                        48 lượt đánh giá
                     </span>
                 </div>
             </div>
 
             {/* Tag */}
-            <span
-                className="hidden sm:inline-block px-3 py-1 rounded-full text-xs font-medium"
-                style={{ backgroundColor: '#374151', color: '#D1D5DB' }}
-            >
-                {product.tag}
-            </span>
+            <div className="flex flex-col items-end gap-2">
+                <span
+                    className="px-3 py-1 text-xs font-medium tracking-wide"
+                    style={{
+                        backgroundColor: '#374151',
+                        color: '#D1D5DB',
+                        borderRadius: '2px'
+                    }}
+                >
+                    {product.tag}
+                </span>
+                <div
+                    className="text-xs"
+                    style={{ color: product.soldCount > 200 ? '#EF4444' : '#6B7280' }}
+                >
+                    {product.soldCount > 200 ? 'Rất hot' : 'Đang hot'}
+                </div>
+            </div>
         </Link>
     );
 };
 
 const TrendingProducts = () => {
     return (
-        <section className="mb-16">
-            <div className="flex items-center justify-between mb-8">
-                <div>
-                    <h2 className="text-3xl font-bold mb-2" style={{ color: '#F9FAFB' }}>
-                        🔥 Xu hướng mua sắm
-                    </h2>
-                    <p style={{ color: '#9CA3AF' }}>
-                        Sản phẩm bán chạy nhất tuần này
-                    </p>
+        <section
+            className="mb-20 px-4"
+            style={{ backgroundColor: '#111827' }}
+        >
+            <div className="max-w-7xl mx-auto">
+                <div className="flex items-center justify-between mb-10 pt-8">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-1 h-6" style={{ backgroundColor: '#22C55E' }}></div>
+                            <h2
+                                className="text-2xl font-light tracking-wider uppercase"
+                                style={{ color: '#F9FAFB' }}
+                            >
+                                Sản Phẩm Xu Hướng
+                            </h2>
+                        </div>
+                        <p
+                            className="text-sm font-light tracking-wide"
+                            style={{ color: '#9CA3AF' }}
+                        >
+                            Những sản phẩm được ưa chuộng nhất tuần qua
+                        </p>
+                    </div>
+
+                    <Link
+                        to="/products?sort=bestseller"
+                        className="group flex items-center gap-2 px-6 py-2.5 border border-gray-700 hover:border-green-500 transition-all duration-300"
+                        style={{
+                            backgroundColor: 'transparent',
+                            color: '#F9FAFB',
+                            borderRadius: '2px'
+                        }}
+                    >
+                        <span className="text-sm font-medium group-hover:text-green-400 transition-colors">
+                            XEM TẤT CẢ
+                        </span>
+                        <svg
+                            className="w-4 h-4 group-hover:text-green-400 transition-colors"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            />
+                        </svg>
+                    </Link>
                 </div>
 
-                <Link
-                    to="/products?sort=bestseller"
-                    className="hidden sm:flex items-center gap-2 px-5 py-2 rounded-lg transition-all hover:opacity-80"
-                    style={{ backgroundColor: '#374151', color: '#F9FAFB' }}
-                >
-                    <span>Xem thêm</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                </Link>
-            </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 pb-12">
+                    {trendingProducts.map((product, index) => (
+                        <TrendingCard key={product.id} product={product} rank={index + 1} />
+                    ))}
+                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {trendingProducts.map((product, index) => (
-                    <TrendingCard key={product.id} product={product} rank={index + 1} />
-                ))}
+                {/* Decorative line */}
+                <div className="pt-8">
+                    <div className="h-px" style={{
+                        background: 'linear-gradient(90deg, transparent, #374151, transparent)'
+                    }}></div>
+                </div>
             </div>
         </section>
     );

@@ -47,6 +47,9 @@ const ProductDetail = () => {
         }
     };
 
+    console.log(product);
+
+
     const handleBuyNow = () => {
         const cartItem = {
             id: product.id,
