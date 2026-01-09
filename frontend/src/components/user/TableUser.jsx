@@ -83,7 +83,6 @@ const TableUser = (props) => {
       key: 'address',
       width: '25%',
       render: (text) => <span>{text}</span>,
-      ellipsis: true,
     },
     {
       title: 'Trạng thái',
