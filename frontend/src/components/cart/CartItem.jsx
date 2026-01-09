@@ -35,7 +35,7 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
                     {/* Quantity Controls */}
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => onQuantityChange(item.id, item.quantity - 1)}
+                            onClick={() => onQuantityChange(item.cartItemId || item.id, item.quantity - 1)}
                             className="p-1 rounded border border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 transition"
                         >
                             <FiMinus size={16} />
@@ -43,12 +43,12 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
                         <input
                             type="number"
                             value={item.quantity}
-                            onChange={(e) => onQuantityChange(item.id, parseInt(e.target.value) || 1)}
+                            onChange={(e) => onQuantityChange(item.cartItemId || item.id, parseInt(e.target.value) || 1)}
                             className="w-12 text-center bg-gray-800 border border-gray-600 rounded text-white"
                             min="1"
                         />
                         <button
-                            onClick={() => onQuantityChange(item.id, item.quantity + 1)}
+                            onClick={() => onQuantityChange(item.cartItemId || item.id, item.quantity + 1)}
                             className="p-1 rounded border border-gray-600 text-gray-400 hover:text-green-400 hover:border-green-400 transition"
                         >
                             <FiPlus size={16} />
@@ -59,7 +59,7 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
                 {/* Item Total & Remove */}
                 <div className="flex flex-col items-end justify-between">
                     <button
-                        onClick={() => onRemove(item.id)}
+                        onClick={() => onRemove(item.cartItemId || item.id)}
                         className="text-gray-400 hover:text-red-500 transition"
                     >
                         <FiTrash2 size={20} />

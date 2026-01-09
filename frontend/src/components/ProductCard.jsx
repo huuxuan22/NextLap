@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import RatingStars from './RatingStars';
+import { addToCart } from '../utils/cartUtils';
 
 /**
  * ProductCard - Component card hiển thị sản phẩm
@@ -60,6 +62,34 @@ const ProductCard = ({ product }) => {
         setIsWishlisted(!isWishlisted);
         // Thêm logic xử lý wishlist ở đây
         console.log(`${isWishlisted ? 'Xóa' : 'Thêm'} sản phẩm vào wishlist:`, product.id);
+    };
+
+    // Xử lý thêm vào giỏ hàng
+    const handleAddToCart = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const images = getProductImages();
+        const cartItem = {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: images[0] || '/images/placeholder.jpg',
+            quantity: 1
+        };
+
+        try {
+            const result = await addToCart(cartItem);
+            if (result) {
+                toast.success(`Đã thêm ${product.name} vào giỏ hàng!`, {
+                    autoClose: 2000
+                });
+            } else {
+                toast.error('Có lỗi khi thêm vào giỏ hàng');
+            }
+        } catch (error) {
+            toast.error('Có lỗi khi thêm vào giỏ hàng');
+        }
     };
 
     return (
@@ -239,10 +269,7 @@ const ProductCard = ({ product }) => {
                             backgroundColor: '#22C55E',
                             color: '#111827'
                         }}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            // Add to cart logic here
-                        }}
+                        onClick={handleAddToCart}
                         title="Thêm vào giỏ hàng"
                     >
                         <svg

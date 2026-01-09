@@ -20,7 +20,6 @@ const TableUser = (props) => {
       message.success('Khóa người dùng thành công');
       await loadUsers();
     } catch (error) {
-      console.log('Lock User Error:', error);
       notification.error({
         message: 'Khóa người dùng thất bại',
         description:
@@ -36,7 +35,6 @@ const TableUser = (props) => {
       message.success('Mở khóa người dùng thành công');
       await loadUsers();
     } catch (error) {
-      console.log('Unlock User Error:', error);
       notification.error({
         message: 'Mở khóa người dùng thất bại',
         description:

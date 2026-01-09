@@ -84,7 +84,7 @@ const ProductDetail = () => {
     const inStock = product.spec?.quantity_in_stock > 0;
     const brandName = product.brand?.name || 'Không xác định';
 
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         const cartItem = {
             id: product.id,
             name: product.name,
@@ -93,14 +93,20 @@ const ProductDetail = () => {
             quantity: quantity
         };
 
-        if (addToCart(cartItem)) {
-            toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
-        } else {
+        try {
+            const result = await addToCart(cartItem);
+            if (result) {
+                toast.success(`Đã thêm ${quantity} ${product.name} vào giỏ hàng!`);
+            } else {
+                toast.error('Có lỗi khi thêm vào giỏ hàng');
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
             toast.error('Có lỗi khi thêm vào giỏ hàng');
         }
     };
 
-    const handleBuyNow = () => {
+    const handleBuyNow = async () => {
         const cartItem = {
             id: product.id,
             name: product.name,
@@ -109,9 +115,15 @@ const ProductDetail = () => {
             quantity: quantity
         };
 
-        if (addToCart(cartItem)) {
-            navigate('/checkout');
-        } else {
+        try {
+            const result = await addToCart(cartItem);
+            if (result) {
+                navigate('/checkout');
+            } else {
+                toast.error('Có lỗi khi xử lý đơn hàng');
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
             toast.error('Có lỗi khi xử lý đơn hàng');
         }
     };
