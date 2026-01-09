@@ -1,7 +1,6 @@
-from fastapi import Request, Depends
-from starlette.middleware.base import BaseHTTPMiddleware  
+from fastapi import Request, HTTPException, status
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from fastapi import HTTPException, status
 from utils.auth import validate_token
 from config.config import settings
 from config.database import SessionLocal
@@ -86,11 +85,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
         "/auth/facebook/callback",
         "/payment/vnpay/return",
         "/payment/vnpay/ipn",
-        "/payment/vnpay/status"
+        "/payment/vnpay/status",
+        "/health",
+        "/"
     ]
 
     __prefix_paths = [
-        ("/brands/logo/", ["GET"]),  
+        ("/brands/logo/", ["GET"]),
+        ("/products", ["GET"]),
+        ("/brands", ["GET"]),
     ]
 
     __swagger_paths = ["/docs", "/redoc", "/openapi.json"]

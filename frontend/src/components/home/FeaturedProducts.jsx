@@ -1,48 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductCard from '../ProductCard';
+import productApi from '../../api/productApi';
 
 /**
  * FeaturedProducts - Hiển thị sản phẩm nổi bật
  */
 
-// Mock data - thay thế bằng API call thực tế
-const featuredProducts = [
-    {
-        id: 1,
-        name: 'MacBook Pro 14" M3 Pro',
-        specs: 'M3 Pro, 18GB RAM, 512GB SSD',
-        price: 49990000,
-        rating: 4.9,
-        image: null
-    },
-    {
-        id: 2,
-        name: 'ASUS ROG Strix G16',
-        specs: 'Intel i9, RTX 4070, 32GB RAM',
-        price: 45990000,
-        rating: 4.8,
-        image: null
-    },
-    {
-        id: 3,
-        name: 'Dell XPS 15',
-        specs: 'Intel i7, 16GB RAM, 512GB SSD',
-        price: 38990000,
-        rating: 4.7,
-        image: null
-    },
-    {
-        id: 4,
-        name: 'Lenovo ThinkPad X1 Carbon',
-        specs: 'Intel i7, 16GB RAM, 512GB SSD',
-        price: 35990000,
-        rating: 4.6,
-        image: null
-    }
-];
-
 const FeaturedProducts = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoading(true);
+                const response = await productApi.getAll(0, 8);
+                if (response && response.data) {
+                    setProducts(response.data);
+                } else if (Array.isArray(response)) {
+                    setProducts(response);
+                }
+            } catch (error) {
+                // Silent fail - products will show empty state
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
     return (
         <section className="mb-16">
             {/* Header */}
@@ -75,11 +61,21 @@ const FeaturedProducts = () => {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {featuredProducts.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                ))}
-            </div>
+            {loading ? (
+                <div className="text-center py-10" style={{ color: '#9CA3AF' }}>
+                    Đang tải sản phẩm...
+                </div>
+            ) : products.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {products.slice(0, 4).map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-10" style={{ color: '#9CA3AF' }}>
+                    Không có sản phẩm nào
+                </div>
+            )}
 
             {/* Mobile View All Button */}
             <div className="sm:hidden mt-6 text-center">
