@@ -9,6 +9,9 @@ const orderApi = {
     return axiosClient.get(`/orders?${params.toString()}`);
   },
   getById: (id) => axiosClient.get(`/orders/${id}`),
+  updateStatus: (orderId, data) => {
+    return axiosClient.patch(`/orders/${orderId}/status`, data);
+  },
 };
 
 export default orderApi;
