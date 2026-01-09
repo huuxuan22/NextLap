@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { clearAuth } from "../utils/storage";
 import Footer from "../components/Footer";
 import authApi from "../api/authApi";
@@ -329,6 +331,21 @@ const MainLayout = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Toast Notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        style={{ zIndex: 9999 }}
+      />
     </div>
   );
 };
