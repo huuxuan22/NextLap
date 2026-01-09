@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     CLOUDINARY_API_KEY: str = Field(..., alias="CLOUDINARY_API_KEY")
     CLOUDINARY_API_SECRET: str = Field(..., alias="CLOUDINARY_API_SECRET")
     CLOUDINARY_SECURE: bool = Field(True, alias="CLOUDINARY_SECURE")
+ 
     # Email settings
     MAIL_SERVER: str = Field("smtp.gmail.com", alias="MAIL_SERVER")
     MAIL_PORT: int = Field(587, alias="MAIL_PORT")

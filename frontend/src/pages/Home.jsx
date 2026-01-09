@@ -15,39 +15,42 @@ import {
 
 const Home = () => {
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-            {/* Hero Banner */}
+        <div>
             <HeroSection />
 
-            {/* Flash Sale */}
-            <FlashSale />
+            <div className="max-w-9xl mx-auto px-4 py-8">
+                {/* Hero Banner */}
 
-            {/* Danh mục sản phẩm */}
-            <CategorySection />
+                {/* Flash Sale */}
+                <FlashSale />
 
-            {/* Banner khuyến mãi */}
-            <PromoBanner />
+                {/* Danh mục sản phẩm */}
+                <CategorySection />
 
-            {/* Xu hướng mua sắm */}
-            <TrendingProducts />
+                {/* Banner khuyến mãi */}
+                <PromoBanner />
 
-            {/* Sản phẩm nổi bật */}
-            <FeaturedProducts />
+                {/* Xu hướng mua sắm */}
+                <TrendingProducts />
 
-            {/* Đối tác thương hiệu */}
-            <BrandPartners />
+                {/* Sản phẩm nổi bật */}
+                <FeaturedProducts />
 
-            {/* Tại sao chọn chúng tôi */}
-            <WhyChooseUs />
+                {/* Đối tác thương hiệu */}
+                <BrandPartners />
 
-            {/* Đánh giá khách hàng */}
-            <CustomerReviews />
+                {/* Tại sao chọn chúng tôi */}
+                <WhyChooseUs />
 
-            {/* Tin tức & Bài viết */}
-            <LatestNews />
+                {/* Đánh giá khách hàng */}
+                <CustomerReviews />
 
-            {/* Đăng ký nhận tin */}
-            <Newsletter />
+                {/* Tin tức & Bài viết */}
+                <LatestNews />
+
+                {/* Đăng ký nhận tin */}
+                <Newsletter />
+            </div>
         </div>
     );
 };

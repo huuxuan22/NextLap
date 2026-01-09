@@ -86,6 +86,3 @@ class DashboardService:
             })
         
         return sales_data
-
-        
-        
