@@ -13,11 +13,21 @@ from typing import Optional
 class OrderService:
     
     # Valid order status values
-    VALID_STATUSES = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED']
+    VALID_STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPING', 'DELIVERED', 'CANCELLED']
+    
+    # Status transition rules
+    STATUS_TRANSITIONS = {
+        'PENDING': ['CONFIRMED', 'CANCELLED'],
+        'CONFIRMED': ['PREPARING', 'CANCELLED'],
+        'PREPARING': ['SHIPPING', 'CANCELLED'],
+        'SHIPPING': ['DELIVERED', 'CANCELLED'],
+        'DELIVERED': [],  # Final state
+        'CANCELLED': []   # Final state
+    }
     
     @staticmethod
     def _serialize_order_with_items(order: Order) -> dict:
-        """Serialize order with items including product details and user information"""
+        """Serialize order with items including product details, user information, and payment"""
         order_data = jsonable_encoder(order)
         
         # Add user information
@@ -31,6 +41,19 @@ class OrderService:
                 "address": user.address,
                 "avatar": user.avatar
             }
+        
+        # Add payment information
+        if order.payment:
+            payment = order.payment
+            order_data["payment"] = {
+                "id": payment.id,
+                "method": payment.method,
+                "amount": float(payment.amount) if payment.amount else None,
+                "status": payment.status,
+                "paid_at": payment.paid_at.isoformat() if payment.paid_at else None
+            }
+        else:
+            order_data["payment"] = None
         
         # Add product details to each order item
         if order.order_items:
@@ -149,7 +172,7 @@ class OrderService:
     
     @staticmethod
     def update_order_status(db: Session, order_id: int, new_status: str):
-        """Update order status"""
+        """Update order status with validation and transition rules"""
         # Validate status
         new_status = new_status.upper()
         if new_status not in OrderService.VALID_STATUSES:
@@ -163,6 +186,38 @@ class OrderService:
             return None
         
         old_status = order.status
+        
+        # Check if status transition is allowed
+        if old_status in OrderService.STATUS_TRANSITIONS:
+            allowed_transitions = OrderService.STATUS_TRANSITIONS[old_status]
+            if new_status not in allowed_transitions and old_status != new_status:
+                status_names = {
+                    'PENDING': 'Chờ xác nhận',
+                    'CONFIRMED': 'Đã xác nhận',
+                    'PREPARING': 'Đang chuẩn bị hàng',
+                    'SHIPPING': 'Đang giao hàng',
+                    'DELIVERED': 'Hoàn thành',
+                    'CANCELLED': 'Đã hủy'
+                }
+                
+                if not allowed_transitions:
+                    raise ValueError(
+                        f"Không thể thay đổi trạng thái từ '{status_names.get(old_status, old_status)}'. "
+                        f"Đây là trạng thái cuối cùng."
+                    )
+                
+                allowed_names = [status_names.get(s, s) for s in allowed_transitions]
+                raise ValueError(
+                    f"Không thể chuyển từ trạng thái '{status_names.get(old_status, old_status)}' "
+                    f"sang '{status_names.get(new_status, new_status)}'. "
+                    f"Các trạng thái được phép: {', '.join(allowed_names)}"
+                )
+        
+        # If same status, no change needed
+        if old_status == new_status:
+            logger.info(f"Order {order_id} already has status {new_status}, no update needed")
+            return OrderService._serialize_order_with_items(order)
+        
         order.status = new_status
         
         try:
@@ -176,9 +231,7 @@ class OrderService:
             db.rollback()
             logger.error(f"Error updating order status: {str(e)}")
             raise
-    
-    @staticmethod
-    def get_order_statistics(db: Session) -> dict:
+
         """Get order statistics for admin dashboard"""
         # Total orders
         total_orders = db.query(Order).count()
@@ -199,10 +252,6 @@ class OrderService:
         # Average order value
         avg_order_value = db.query(func.avg(Order.total)).scalar() or 0
         
-        # Recent orders count (last 30 days - approximate)
-        # Note: This assumes created_at is a datetime field
-        # You may need to adjust based on your actual database setup
-        
         statistics = {
             "total_orders": total_orders,
             "orders_by_status": orders_by_status,
@@ -210,7 +259,9 @@ class OrderService:
             "average_order_value": float(avg_order_value),
             "delivered_orders": orders_by_status.get('DELIVERED', 0),
             "pending_orders": orders_by_status.get('PENDING', 0),
-            "processing_orders": orders_by_status.get('PROCESSING', 0),
+            "confirmed_orders": orders_by_status.get('CONFIRMED', 0),
+            "preparing_orders": orders_by_status.get('PREPARING', 0),
+            "shipping_orders": orders_by_status.get('SHIPPING', 0),
             "cancelled_orders": orders_by_status.get('CANCELLED', 0)
         }
         

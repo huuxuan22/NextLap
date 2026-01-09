@@ -18,11 +18,13 @@ const OrderAdmin = () => {
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState(null);
 
+  // Fixed STATUS_OPTIONS to match backend exactly
   const STATUS_OPTIONS = [
     { value: 'PENDING', label: 'Chờ xác nhận' },
-    { value: 'PROCESSING', label: 'Đang xử lý' },
-    { value: 'SHIPPED', label: 'Đã gửi hàng' },
-    { value: 'DELIVERED', label: 'Đã giao' },
+    { value: 'CONFIRMED', label: 'Đã xác nhận' },
+    { value: 'PREPARING', label: 'Đang chuẩn bị' },
+    { value: 'SHIPPING', label: 'Đang giao hàng' },
+    { value: 'DELIVERED', label: 'Đã giao hàng' },
     { value: 'CANCELLED', label: 'Đã hủy' },
   ];
 

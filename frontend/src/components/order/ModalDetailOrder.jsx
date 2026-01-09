@@ -5,10 +5,11 @@ const ModalDetailOrder = (props) => {
   const { isModalOpen, orderDetail, loading, onCancel } = props;
 
   const STATUS_OPTIONS = [
-    { value: 'PENDING', label: 'Chờ xác nhận', color: '#FBBF24' },
-    { value: 'PROCESSING', label: 'Đang xử lý', color: '#3B82F6' },
-    { value: 'SHIPPED', label: 'Đã gửi hàng', color: '#8B5CF6' },
-    { value: 'DELIVERED', label: 'Đã giao', color: '#10B981' },
+    { value: 'PENDING', label: 'Chờ xác nhận', color: '#F59E0B' },
+    { value: 'CONFIRMED', label: 'Đã xác nhận', color: '#3B82F6' },
+    { value: 'PREPARING', label: 'Đang chuẩn bị', color: '#8B5CF6' },
+    { value: 'SHIPPING', label: 'Đang giao hàng', color: '#06B6D4' },
+    { value: 'DELIVERED', label: 'Đã giao hàng', color: '#10B981' },
     { value: 'CANCELLED', label: 'Đã hủy', color: '#EF4444' },
   ];
 
@@ -170,7 +171,7 @@ const ModalDetailOrder = (props) => {
                       Phương thức thanh toán
                     </p>
                     <p className="text-base font-semibold">
-                      {orderDetail.payment.payment_method || 'N/A'}
+                      {orderDetail.payment.method || 'N/A'}
                     </p>
                   </div>
                   <div>

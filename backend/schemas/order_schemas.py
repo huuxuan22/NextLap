@@ -8,8 +8,9 @@ from enum import Enum
 class OrderStatus(str, Enum):
     """Valid order status values"""
     PENDING = "PENDING"
-    PROCESSING = "PROCESSING"
-    SHIPPED = "SHIPPED"
+    CONFIRMED = "CONFIRMED"
+    PREPARING = "PREPARING"
+    SHIPPING = "SHIPPING"
     DELIVERED = "DELIVERED"
     CANCELLED = "CANCELLED"
 
@@ -42,6 +43,31 @@ class OrderItemResponse(OrderItemBase):
     id: int
     order_id: Optional[int] = None
     product: Optional[ProductInfoInOrder] = None
+
+    class Config:
+        from_attributes = True
+
+
+class PaymentResponse(BaseModel):
+    """Schema for Payment information in order"""
+    id: int
+    method: Optional[str] = None
+    amount: Optional[float] = None
+    status: Optional[str] = None
+    paid_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UserInfoInOrder(BaseModel):
+    """Schema for user info in order"""
+    id: int
+    fullname: Optional[str] = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    address: Optional[str] = None
+    avatar: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -81,6 +107,8 @@ class OrderResponse(OrderBase):
     user_id: Optional[int] = None
     created_at: datetime
     order_items: Optional[List[OrderItemResponse]] = None
+    payment: Optional[PaymentResponse] = None
+    user: Optional[UserInfoInOrder] = None
 
     class Config:
         from_attributes = True

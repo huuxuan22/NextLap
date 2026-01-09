@@ -21,10 +21,11 @@ const TableOrder = (props) => {
   const [updatingId, setUpdatingId] = useState(null);
 
   const STATUS_OPTIONS = [
-    { value: 'PENDING', label: 'Chờ xác nhận', color: '#FBBF24' },
-    { value: 'PROCESSING', label: 'Đang xử lý', color: '#3B82F6' },
-    { value: 'SHIPPED', label: 'Đã gửi hàng', color: '#8B5CF6' },
-    { value: 'DELIVERED', label: 'Đã giao', color: '#10B981' },
+    { value: 'PENDING', label: 'Chờ xác nhận', color: '#F59E0B' },
+    { value: 'CONFIRMED', label: 'Đã xác nhận', color: '#3B82F6' },
+    { value: 'PREPARING', label: 'Đang chuẩn bị', color: '#8B5CF6' },
+    { value: 'SHIPPING', label: 'Đang giao hàng', color: '#06B6D4' },
+    { value: 'DELIVERED', label: 'Đã giao hàng', color: '#10B981' },
     { value: 'CANCELLED', label: 'Đã hủy', color: '#EF4444' },
   ];
 
@@ -36,6 +37,26 @@ const TableOrder = (props) => {
   const getStatusLabel = (status) => {
     const option = STATUS_OPTIONS.find((opt) => opt.value === status);
     return option?.label || status;
+  };
+
+  // Get allowed next statuses based on current status
+  const getAvailableStatuses = (currentStatus) => {
+    const transitions = {
+      PENDING: ['CONFIRMED', 'CANCELLED'],
+      CONFIRMED: ['PREPARING', 'CANCELLED'],
+      PREPARING: ['SHIPPING', 'CANCELLED'],
+      SHIPPING: ['DELIVERED', 'CANCELLED'],
+      DELIVERED: [], // Final state
+      CANCELLED: [], // Final state
+    };
+
+    const allowedStatuses = transitions[currentStatus] || [];
+
+    // Filter STATUS_OPTIONS to only show allowed transitions
+    return STATUS_OPTIONS.filter(
+      (opt) =>
+        opt.value === currentStatus || allowedStatuses.includes(opt.value)
+    );
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
@@ -73,14 +94,6 @@ const TableOrder = (props) => {
       },
     },
     {
-      title: 'ID Đơn hàng',
-      dataIndex: 'id',
-      key: 'id',
-      width: '10%',
-      render: (id) => <span className="font-medium">#{id}</span>,
-      sorter: (a, b) => a.id - b.id,
-    },
-    {
       title: 'Khách hàng',
       key: 'user',
       width: '15%',
@@ -110,20 +123,30 @@ const TableOrder = (props) => {
       dataIndex: 'status',
       key: 'status',
       width: '15%',
-      render: (status, record) => (
-        <Select
-          style={{
-            width: '100%',
-            borderColor: getStatusColor(status),
-          }}
-          value={status}
-          onChange={(newStatus) => handleStatusChange(record.id, newStatus)}
-          loading={updatingId === record.id}
-          options={STATUS_OPTIONS}
-          optionLabelProp="label"
-          className="font-medium"
-        />
-      ),
+      render: (status, record) => {
+        console.log('Current status:', status, 'Type:', typeof status);
+
+        const availableStatuses = getAvailableStatuses(status);
+        console.log('Available statuses:', availableStatuses);
+        const isFinalState = status === 'DELIVERED' || status === 'CANCELLED';
+
+        return (
+          <Select
+            style={{
+              width: '100%',
+              borderColor: getStatusColor(status),
+            }}
+            value={status}
+            onChange={(newStatus) => handleStatusChange(record.id, newStatus)}
+            onClick={() => console.log('check status:', availableStatuses)}
+            loading={updatingId === record.id}
+            disabled={isFinalState || updatingId === record.id}
+            options={availableStatuses}
+            optionLabelProp="label"
+            className="font-medium"
+          />
+        );
+      },
     },
     {
       title: 'Ngày tạo',
