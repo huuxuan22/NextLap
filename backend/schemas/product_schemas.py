@@ -29,6 +29,16 @@ class ProductSpecResponse(ProductSpecBase):
         from_attributes = True
 
 
+class BrandInProduct(BaseModel):
+    """Schema for Brand in Product response"""
+    id: int
+    name: str
+    country: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
 class ProductBase(BaseModel):
     """Base schema for Product"""
     name: str = Field(..., min_length=1, max_length=150)
@@ -51,6 +61,7 @@ class ProductResponse(ProductBase):
     id: int
     created_at: datetime
     spec: Optional[ProductSpecResponse] = None
+    brand: Optional[BrandInProduct] = None
 
     class Config:
         from_attributes = True
