@@ -24,9 +24,6 @@ const Home = () => {
                 {/* Flash Sale */}
                 <FlashSale />
 
-                {/* Danh mục sản phẩm */}
-                <CategorySection />
-
                 {/* Banner khuyến mãi */}
                 <PromoBanner />
 

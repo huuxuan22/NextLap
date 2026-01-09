@@ -144,6 +144,99 @@ async def create_product(
         )
 
 
+# IMPORTANT: Specific routes with path parameters must come BEFORE generic ones
+# /by-brand/{brand_identifier} must be before /{product_id}
+@product_router.get(
+    "/by-brand/{brand_identifier}",
+    response_model=DataResponse[list[ProductResponse]],
+    status_code=status.HTTP_200_OK,
+    summary="Get products by brand",
+    description="Retrieve products filtered by brand name or ID"
+)
+async def get_products_by_brand(
+    brand_identifier: str,
+    skip: int = Query(0, ge=0, description="Number of items to skip"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum items to return"),
+    search: str | None = Query(None, description="Search by product name"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get products filtered by brand name or ID.
+    
+    Path parameters:
+    - **brand_identifier**: Brand name (case-insensitive, e.g., "apple", "dell") or brand ID
+    
+    Query parameters:
+    - **skip**: Number of products to skip (default: 0)
+    - **limit**: Maximum number of products to return (default: 10, max: 100)
+    - **search**: Search by product name (optional)
+    
+    Returns:
+        - **200**: List of products for the specified brand
+        - **404**: Brand not found
+        - **500**: Internal server error
+    """
+    try:
+        from services.brand_service import BrandService
+        
+        # Try to parse as integer (brand_id)
+        brand_id = None
+        try:
+            brand_id = int(brand_identifier)
+            brand = BrandService.get_brand_by_id(brand_id, db)
+        except ValueError:
+            # Not an integer, treat as brand name
+            brand = BrandService.get_brand_by_name(brand_identifier, db)
+            if brand:
+                brand_id = brand.id
+        
+        if not brand:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Không tìm thấy thương hiệu '{brand_identifier}'"
+            )
+        
+        # Get products for this brand
+        products = ProductService.get_all_products(
+            db,
+            skip=skip,
+            limit=limit,
+            search=search,
+            brand_id=brand_id
+        )
+
+        total = ProductService.get_products_count(
+            db,
+            search=search,
+            brand_id=brand_id
+        )
+
+        # Calculate pagination info
+        pagination = {
+            "skip": skip,
+            "limit": limit,
+            "total": total,
+            "current_page": (skip // limit) + 1,
+            "total_pages": (total + limit - 1) // limit,
+            "has_next": (skip + limit) < total,
+            "has_prev": skip > 0
+        }
+
+        return DataResponse.custom_response(
+            data=products,
+            code="200",
+            message=f"Lấy danh sách sản phẩm của thương hiệu {brand.name} thành công (tổng: {total})",
+            pagination=pagination
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi đã xảy ra: {str(e)}"
+        )
+
 
 @product_router.get(
     "/{product_id}",

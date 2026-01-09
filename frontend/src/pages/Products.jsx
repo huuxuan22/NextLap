@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import ProductFilter from '../components/ProductFilter';
 import productApi from '../api/productApi';
@@ -8,6 +9,7 @@ import brandApi from '../api/brandApi';
  * Products - Trang danh sách sản phẩm
  */
 const Products = () => {
+    const [searchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [brands, setBrands] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,6 +22,23 @@ const Products = () => {
     const [priceRange, setPriceRange] = useState('all');
     const [selectedChip, setSelectedChip] = useState('all');
     const [selectedRam, setSelectedRam] = useState('all');
+
+    // Get brand from URL parameter on mount
+    useEffect(() => {
+        const brandParam = searchParams.get('brand');
+        if (brandParam && brands.length > 0) {
+            const brand = brands.find(b =>
+                b.name.toLowerCase() === brandParam.toLowerCase()
+            );
+            if (brand) {
+                setSelectedBrand(brand.id);
+            } else {
+                // Brand not found, reset to 'all'
+                setSelectedBrand('all');
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams.get('brand'), brands.length]);
 
     // Debounce search term
     useEffect(() => {

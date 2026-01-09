@@ -31,6 +31,14 @@ class  BrandService :
         return db.query(Brand).filter(Brand.id == brand_id).first()
     
     @staticmethod
+    def get_brand_by_name(brand_name: str, db: Session) -> Optional[Brand]:
+        """Get brand by name (case-insensitive)"""
+        return db.query(Brand).filter(
+            func.lower(Brand.name) == func.lower(brand_name),
+            Brand.deleted_at == None
+        ).first()
+    
+    @staticmethod
     def create_brand(data : BrandCreateSchema, db: Session) -> Brand:
       new_brand = Brand(
           name = data.name,
