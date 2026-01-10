@@ -24,6 +24,7 @@ const Introduce = lazy(() => import('../pages/Introduce'));
 const Profile = lazy(() => import('../pages/Profile'));
 const ProfileEdit = lazy(() => import('../pages/ProfileEdit'));
 const PaymentResult = lazy(() => import('../pages/PaymentResult'));
+const News = lazy(() => import('../pages/News'));
 
 const LoadingFallback = () => (
   <div
@@ -124,6 +125,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingFallback />}>
             <AuthCallback />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'news',
+        element: (
+          <Suspense fallback={<LoadingFallback />}>
+            <News />
           </Suspense>
         ),
       },

@@ -244,6 +244,14 @@ const MainLayout = () => {
               >
                 Giới thiệu
               </Link>
+              {/* Tin tức */}
+              <Link
+                to="/news"
+                className="text-text-light transition-colors hover:no-underline hover:bg-bg-dark hover:text-highlight-hover px-3 py-2 rounded"
+
+              >
+                Tin tức
+              </Link>
             </nav>
 
             {/* Icon bên phải */}
